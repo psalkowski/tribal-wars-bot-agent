@@ -1,0 +1,123 @@
+{
+  "id": 24801823,
+  "status": "clean",
+  "luck": 10.7,
+  "attackerVillageId": 33905,
+  "attackerPlayerId": 849212251,
+  "attackerX": 577,
+  "attackerY": 661,
+  "defenderVillageId": 32189,
+  "defenderPlayerId": 0,
+  "defenderX": 576,
+  "defenderY": 662,
+  "attackerArmy": {
+    "spear": {
+      "sent": 20,
+      "lost": 0
+    },
+    "sword": {
+      "sent": 10,
+      "lost": 0
+    },
+    "axe": {
+      "sent": 0,
+      "lost": 0
+    },
+    "archer": {
+      "sent": 0,
+      "lost": 0
+    },
+    "spy": {
+      "sent": 0,
+      "lost": 0
+    },
+    "light": {
+      "sent": 0,
+      "lost": 0
+    },
+    "marcher": {
+      "sent": 0,
+      "lost": 0
+    },
+    "heavy": {
+      "sent": 0,
+      "lost": 0
+    },
+    "ram": {
+      "sent": 0,
+      "lost": 0
+    },
+    "catapult": {
+      "sent": 0,
+      "lost": 0
+    },
+    "knight": {
+      "sent": 0,
+      "lost": 0
+    },
+    "snob": {
+      "sent": 0,
+      "lost": 0
+    }
+  },
+  "defenderArmy": {
+    "spear": {
+      "sent": 0,
+      "lost": 0
+    },
+    "sword": {
+      "sent": 0,
+      "lost": 0
+    },
+    "axe": {
+      "sent": 0,
+      "lost": 0
+    },
+    "archer": {
+      "sent": 0,
+      "lost": 0
+    },
+    "spy": {
+      "sent": 0,
+      "lost": 0
+    },
+    "light": {
+      "sent": 0,
+      "lost": 0
+    },
+    "marcher": {
+      "sent": 0,
+      "lost": 0
+    },
+    "heavy": {
+      "sent": 0,
+      "lost": 0
+    },
+    "ram": {
+      "sent": 0,
+      "lost": 0
+    },
+    "catapult": {
+      "sent": 0,
+      "lost": 0
+    },
+    "knight": {
+      "sent": 0,
+      "lost": 0
+    },
+    "snob": {
+      "sent": 0,
+      "lost": 0
+    },
+    "militia": {
+      "sent": 0,
+      "lost": 0
+    }
+  },
+  "lootedWood": 17,
+  "lootedStone": 20,
+  "lootedIron": 20,
+  "lootedTotal": 57,
+  "lootCapacity": 650,
+  "battleAt": 1722675154394
+}

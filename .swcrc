@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/swcrc",
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "tsx": false,
+      "decorators": true,
+      "dynamicImport": true
+    },
+    "transform": {
+      "legacyDecorator": true,
+      "decoratorMetadata": true
+    },
+    "target": "es2022",
+    "loose": false,
+    "baseUrl": "./",
+    "externalHelpers": false,
+    "keepClassNames": true
+  },
+  "module": {
+    "type": "nodenext",
+    "resolveFully": true
+  },
+  "minify": false,
+  "sourceMaps": true
+}

@@ -1,0 +1,2 @@
+export const HUMAN_REACTION_MIN_MS = 1500;
+export const HUMAN_REACTION_MAX_MS = 2500;

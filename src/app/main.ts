@@ -1,0 +1,36 @@
+import 'reflect-metadata';
+import { config as dotenv } from 'dotenv';
+import { Agent } from './service/agent.js';
+// import { setupTransmit } from './events/index.js';
+import { setupErrorHandling } from './service/error.js';
+import { wait } from './utils/wait.js';
+import { Container } from 'typedi';
+import { QueueManager } from './manager/queue.manager.js';
+import moment from 'moment';
+import Logger from './core/logger.js';
+
+dotenv();
+
+(async () => {
+  setupErrorHandling();
+  // setupTransmit();
+
+  const queueManager = Container.get(QueueManager);
+  const agent = Container.get(Agent);
+  const logger = Logger.getLogger('Main');
+
+  /* eslint-disable-next-line no-constant-condition */
+  while (true) {
+    logger.log('Start agent');
+    await agent.start();
+
+    const nextRun = queueManager.getNextActionTime();
+
+    logger.log(
+      'Next run at:',
+      moment().add(nextRun, 'milliseconds').format('YYYY-MM-DD HH:mm:ss'),
+    );
+
+    await wait(nextRun);
+  }
+})();
