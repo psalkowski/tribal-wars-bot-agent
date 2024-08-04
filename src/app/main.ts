@@ -30,6 +30,9 @@ dotenv();
     try {
       await agent.start();
     } catch (e) {
+      logger.error('Error occurs');
+      logger.error(e);
+
       const captcha = new CaptchaAction();
       const page = await agent.browser.getPage();
 
@@ -37,9 +40,6 @@ dotenv();
         hasCaptcha = true;
         await captcha.handle(page);
       } else {
-        logger.error('Error occurs');
-        logger.error(e);
-
         const prefix = moment().format('YYYYMMDD_HHmmss');
 
         if (!existsSync('./storage/reports/')) {
