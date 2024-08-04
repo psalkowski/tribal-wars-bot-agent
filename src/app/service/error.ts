@@ -1,4 +1,4 @@
-import { error, log } from '../logger/logger.js';
+import { log } from '../logger/logger.js';
 import { wait } from '../utils/wait.js';
 import { Container } from 'typedi';
 import { Agent } from './agent.js';
@@ -18,9 +18,10 @@ export const setupErrorHandling = () => {
 
     // if errors occurs often than each 60 sec, abort
     if (now - lastErrorTime < 60000) {
-      log('Error occurs often than once per minute. Killing process.');
-      await wait(300000);
-      process.exit(6);
+      do {
+        log('Error occurs often than once per minute. Going into sleep mode.');
+        await wait(300000);
+      } while (true);
     }
 
     lastErrorTime = now;

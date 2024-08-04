@@ -16,9 +16,9 @@ export class CaptchaAction extends Action {
     }
 
     if (solved.length || solutions.length || captchas.length) {
-      this.logger.log('Recaptcha:', { solved, solutions, captchas, error });
+      this.logger.log('Recaptcha Solved:', { solved, solutions, captchas, error });
       // make sure that captcha has been filled
-      await wait(1000);
+      await wait(5000);
     }
 
     return new NoopAction();
@@ -28,7 +28,9 @@ export class CaptchaAction extends Action {
     return (
       (await page.$('#bot_check')) !== null ||
       (await page.$('.g-recaptcha')) !== null ||
-      (await page.$('[data-bot-protect="forced"]')) !== null
+      (await page.$('[data-bot-protect="forced"]')) !== null ||
+      (await page.$('#captcha')) !== null ||
+      (await page.$('.h-captcha')) !== null
     );
   }
 }

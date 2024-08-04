@@ -1,14 +1,9 @@
 import { Bot } from '../bot.js';
-import { writeFileSync } from 'fs';
 import { clearTimeouts } from '../utils/timeout.js';
 import * as Configurations from '../../config/index.js';
 import { Config } from '../constants/config.js';
 import { store } from '../store/store.js';
-import {
-  getWorldId,
-  isAgentEnabled,
-  registerAgent,
-} from '../store/slices/agent.slice.js';
+import { getWorldId, isAgentEnabled, registerAgent } from '../store/slices/agent.slice.js';
 import { Service } from 'typedi';
 import { Browser } from '../core/browser.js';
 import Logger from '../core/logger.js';
@@ -18,7 +13,7 @@ export class Agent {
   logger = Logger.getLogger('Agent');
   working = false;
 
-  constructor(protected browser: Browser, protected bot: Bot) {}
+  constructor(public browser: Browser, public bot: Bot) {}
 
   async start() {
     if (this.working) {
@@ -37,29 +32,11 @@ export class Agent {
     const config: Config = Configurations[world as keyof typeof Configurations];
     const page = await this.browser.createPage();
 
-    // await FarmManager.load();
+    this.logger.log('Start agent.', { world });
 
-    try {
-      this.logger.log('Start agent.', { world });
+    this.working = true;
 
-      this.working = true;
-
-      await this.bot.run({ ...config }, page);
-    } catch (e) {
-      this.logger.error('Error occurs');
-      this.logger.error(e);
-
-      await page.screenshot({
-        path: './fails.png',
-        fullPage: true,
-      });
-
-      writeFileSync('fails.html', await page.content());
-
-      await this.stop();
-
-      throw e;
-    }
+    await this.bot.run({ ...config }, page);
 
     await this.stop();
   }
