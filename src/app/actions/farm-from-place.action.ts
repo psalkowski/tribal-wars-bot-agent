@@ -29,13 +29,32 @@ export class FarmFromPlaceAction extends CompositeAction {
   }
 
   async handle(page: Page): Promise<Action> {
-    const farmManager = Container.get(FarmManager);
     const villageCoordinate = new Coordinate(this.village.x, this.village.y);
+    const templates = [
+      new Army({
+        [ArmyUnit.SPEAR]: 20,
+        [ArmyUnit.SWORD]: 10,
+      }),
+      new Army(
+        {
+          [ArmyUnit.LIGHT]: 10,
+        },
+        {
+          [ArmyUnit.SPY]: 1,
+        },
+      ),
+    ];
 
-    const army = new Army({
-      [ArmyUnit.SPEAR]: 20,
-      [ArmyUnit.SWORD]: 10,
-    } as IArmy);
+    for (const army of templates) {
+      await this.handleArmyTemplate(page, army, villageCoordinate);
+    }
+
+    this.logger.log('Finished');
+    return null;
+  }
+
+  async handleArmyTemplate(page: Page, army: Army, villageCoordinate: Coordinate) {
+    const farmManager = Container.get(FarmManager);
 
     const targets = this.barbarians
       .map((target) => {
@@ -71,9 +90,6 @@ export class FarmFromPlaceAction extends CompositeAction {
 
       farmManager.create(villageCoordinate, target.coordinate, army.getAttackDuration() * target.distance, army.squad);
     }
-
-    this.logger.log('Finished');
-    return null;
   }
 
   async hasAvailableArmy(squad: IArmy) {
@@ -85,23 +101,22 @@ export class FarmFromPlaceAction extends CompositeAction {
   }
 
   async prepareAttack(page: Page, army: Army, target: string) {
+    const units = objectKeys(army.squad);
+    const availableArmy = getArmy(store.getState());
+
     await page.waitForSelector('#place_target > input');
     await page.waitForSelector('.units-entry-all');
     await this.setValue(page, '#place_target > input', target);
 
-    ALL_ARMY_TYPES.filter((name) => army.squad[name]).map(async (name) => {
-      const amount = army.squad[name];
-
-      if (amount > 0) {
-        await this.setValue(page, `#command-data-form input[name="${name}"]`, army.squad[name]);
-      } else {
-        const element = await page.$(`#units_entry_all_${name}`);
-        const text = await page.evaluate((element) => element.textContent, element);
-        const all = text.replace('(', '').replace(')', '');
-
-        await this.setValue(page, `#command-data-form input[name="${name}"]`, all);
+    for (const unit of units) {
+      if (army.squad[unit]) {
+        await this.setValue(page, `#command-data-form input[name="${unit}"]`, army.squad[unit]);
       }
-    });
+
+      if (army.optional[unit] && availableArmy[unit] >= army.optional[unit]) {
+        await this.setValue(page, `#command-data-form input[name="${unit}"]`, army.optional[unit]);
+      }
+    }
 
     await this.clickAttackOrDefense(page);
   }

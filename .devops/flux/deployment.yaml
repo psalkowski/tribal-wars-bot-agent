@@ -25,7 +25,7 @@ spec:
 
       containers:
         - name: tribal-wars-bot-agent
-          image: ghcr.io/psalkowski/tribal-wars-bot-agent:1.0.0
+          image: ghcr.io/psalkowski/tribal-wars-bot-agent:1.0.2
           imagePullPolicy: IfNotPresent
 
           envFrom:

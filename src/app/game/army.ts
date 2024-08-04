@@ -5,6 +5,7 @@ import { objectKeys } from '../utils/object.js';
 
 export class Army {
   squad: IArmy;
+  optional: IArmy;
 
   private durations = {
     [ArmyUnit.SPEAR]: 18,
@@ -21,8 +22,8 @@ export class Army {
     [ArmyUnit.SNOB]: 35,
   };
 
-  constructor(squad: IArmy = {} as IArmy) {
-    this.squad = {
+  constructor(squad: Partial<IArmy> = {}, optional: Partial<IArmy> = {}) {
+    const defaultArmy: IArmy = {
       [ArmyUnit.SPEAR]: 0,
       [ArmyUnit.SWORD]: 0,
       [ArmyUnit.AXE]: 0,
@@ -37,15 +38,20 @@ export class Army {
       [ArmyUnit.SNOB]: 0,
     };
 
+    this.squad = { ...defaultArmy };
+    this.optional = { ...defaultArmy };
+
     objectKeys(squad).forEach((unit) => {
       this.squad[unit] = Number(squad[unit]) || 0;
+    });
+
+    objectKeys(optional).forEach((unit) => {
+      this.squad[unit] = Number(optional[unit]) || 0;
     });
   }
 
   getUnitDuration(unit: keyof IArmy) {
-    return Math.round(
-      moment.duration(this.durations[unit], 'minutes').asMilliseconds(),
-    );
+    return Math.round(moment.duration(this.durations[unit], 'minutes').asMilliseconds());
   }
 
   getDefenseDuration(): number {
@@ -61,8 +67,6 @@ export class Army {
       .filter((key) => this.squad[key])
       .map((key) => this.durations[key]);
 
-    return Math.round(
-      moment.duration(Math.max(...duration), 'minutes').asMilliseconds(),
-    );
+    return Math.round(moment.duration(Math.max(...duration), 'minutes').asMilliseconds());
   }
 }
