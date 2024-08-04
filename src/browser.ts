@@ -10,7 +10,7 @@ import { Browser } from './app/core/browser.js';
 
 dotenv();
 
-process.env.HEADLESS = 'true';
+process.env.HEADLESS = 'false';
 
 (async () => {
   store.dispatch(setAgent({ worldId: process.env.WORLD as string, enabled: true }));

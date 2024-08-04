@@ -4,8 +4,8 @@ import { getQueryParams } from '../utils/query.js';
 import { ScreenType } from '../constants/screen.js';
 import { CheckAction } from '../composite/check.action.js';
 import { Ui } from '../constants/ui.js';
-import { parseTribalWarsUrl } from '../service/navigation.js';
-import { TribalWarsUrls } from '../constants/urls.js';
+import { Container } from 'typedi';
+import Navigation from '../core/navigation.js';
 
 export class OpenOverviewAction extends Action {
   name = 'OpenOverviewAction';
@@ -13,10 +13,10 @@ export class OpenOverviewAction extends Action {
   check = new CheckAction();
 
   async handle(page: Page): Promise<Action> {
+    const navigation = Container.get(Navigation);
+
     try {
-      await page.goto(
-        parseTribalWarsUrl(parseTribalWarsUrl(TribalWarsUrls.overview)),
-      );
+      await navigation.goToScreen(ScreenType.OVERVIEW);
     } catch (e) {
       await this.check.handle(page);
       await this.handle(page);

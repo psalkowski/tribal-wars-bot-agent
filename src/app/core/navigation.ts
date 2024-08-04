@@ -11,10 +11,18 @@ export default class Navigation {
 
   constructor(private browser: Browser) {}
 
-  async goToUrl(relativeUrl: string) {
+  async goToUrl(url: string) {
     const page = await this.browser.getPage();
+    const parsedUrl = url.startsWith('http') ? url : `${this.getDomain()}${url}`;
 
-    return page.goto(`${this.getDomain()}${relativeUrl}`);
+    await Promise.all([
+      page.waitForNavigation({
+        waitUntil: 'networkidle2',
+      }),
+      page.goto(parseTribalWarsUrl(parsedUrl)),
+    ]);
+
+    await page.solveRecaptchas();
   }
 
   async goToScreen(screen: ScreenType, extraParams = {}) {
@@ -27,12 +35,13 @@ export default class Navigation {
 
     this.logger.debug(`Go to ${screen}`, url.toString());
 
-    return Promise.all([
+    await Promise.all([
       page.waitForNavigation({
-        waitUntil: 'domcontentloaded',
+        waitUntil: 'networkidle2',
       }),
       page.goto(url.toString()),
     ]);
+    await page.solveRecaptchas();
   }
 
   private getGameUrl(screen: ScreenType) {

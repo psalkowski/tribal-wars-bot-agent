@@ -52,6 +52,7 @@ export class Browser {
             token: process.env.CAPTCHA_KEY,
           },
           visualFeedback: true,
+          solveInactiveChallenges: true,
         }),
       )
       .launch(this.getPuppeteerOptions() as any);

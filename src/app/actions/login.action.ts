@@ -2,6 +2,7 @@ import { Page } from 'puppeteer';
 import { Action } from './action.js';
 import { getWorldId } from '../store/slices/agent.slice.js';
 import { store } from '../store/store.js';
+import { wait } from '../utils/wait.js';
 
 export class LoginAction extends Action {
   name = 'LoginAction';
@@ -11,8 +12,13 @@ export class LoginAction extends Action {
     await page.type('#password', `${process.env.ACCOUNT_PASSWORD}`);
     await page.click('#remember-me');
     await page.click('.btn-login');
-    await page.waitForSelector('.world_button_active');
-    await page.click(`.world-select[href*=${getWorldId(store.getState())}`);
+
+    try {
+      await page.waitForSelector('a[href="/page/logout"]');
+    } catch (e) {
+      await page.solveRecaptchas();
+      await page.waitForSelector('a[href="/page/logout"]');
+    }
 
     return null;
   }

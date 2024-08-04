@@ -23,8 +23,8 @@ export class QueueManager {
     const nightEnd = moment().set({ hour: 5, minute: 0 });
 
     if (moment().isBetween(nightStart, nightEnd)) {
-      // between 60 and 90 minutes
-      return random(60 * 60 * 1000, 90 * 60 * 1000);
+      // between 50 and 80 minutes
+      return random(50 * 60 * 1000, 80 * 60 * 1000);
     }
 
     // between 20 and 40 minutes

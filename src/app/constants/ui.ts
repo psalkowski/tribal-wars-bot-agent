@@ -4,8 +4,8 @@ export const Ui = {
   },
   Popup: {
     dailyBonus: '.popup_box_container[data-id="daily_bonus"]',
-    dailyBonusClose:
-      '.popup_box_container[data-id="daily_bonus"] .popup_box_close',
+    dailyBonusClose: '.popup_box_container[data-id="daily_bonus"] .popup_box_close',
+    dailyBonusOpen: '.popup_box_container[data-id="daily_bonus"] .actions a',
   },
   Menu: {
     overview: '#menu_row2_village a',

@@ -1,13 +1,20 @@
 import { Action } from './action.js';
 import { Page } from 'puppeteer';
 import { Ui } from '../constants/ui.js';
+import { waitLikeHuman } from '../utils/wait.js';
 
 export class CloseDailyBonusPopupAction extends Action {
   name = 'CloseDailyBonusPopupAction';
 
   async handle(page: Page): Promise<Action> {
-    const elements = await page.$$(Ui.Popup.dailyBonusClose);
+    const openList = await page.$$(Ui.Popup.dailyBonusOpen);
+    for (const element of openList) {
+      await element.click();
+    }
 
+    await waitLikeHuman();
+
+    const elements = await page.$$(Ui.Popup.dailyBonusClose);
     for (const element of elements) {
       await element.click();
     }

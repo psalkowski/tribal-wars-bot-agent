@@ -2,19 +2,16 @@ import { Page } from 'puppeteer';
 import { Action } from './action.js';
 import { parseTribalWarsUrl } from '../service/navigation.js';
 import { Ui } from '../constants/ui.js';
+import { Container } from 'typedi';
+import Navigation from '../core/navigation.js';
 
 export class EnterWorldAction extends Action {
   name = 'EnterWorldAction';
 
   async handle(page: Page): Promise<Action> {
-    await Promise.all([
-      page.waitForNavigation({
-        waitUntil: 'domcontentloaded',
-      }),
+    const navigation = Container.get(Navigation);
 
-      page.click(parseTribalWarsUrl(Ui.Homepage.selectWorld)),
-    ]);
-
+    await navigation.goToUrl(`https://plemiona.pl/page/play/__world__`);
     await page.waitForSelector('#ds_body');
 
     return null;
