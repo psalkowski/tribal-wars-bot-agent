@@ -19,6 +19,7 @@ export const setupErrorHandling = () => {
     // if errors occurs often than each 60 sec, abort
     if (now - lastErrorTime < 60000) {
       log('Error occurs often than once per minute. Killing process.');
+      await wait(300000);
       process.exit(6);
     }
 

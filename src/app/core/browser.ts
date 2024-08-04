@@ -25,7 +25,7 @@ export class Browser {
     }
 
     const page = await this.browser.newPage();
-    page.setDefaultTimeout(5000);
+    page.setDefaultTimeout(30000);
     page.setDefaultNavigationTimeout(30000);
 
     // await this.page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36');
@@ -89,50 +89,52 @@ export class Browser {
 
     if (process.env.HEADLESS === 'true') {
       return {
-        args: [
-          '--mute-audio',
-          '--no-sandbox',
-          '--ignore-certificate-errors',
-          '--force-device-scale-factor',
-          '--disable-setuid-sandbox',
-          '--disable-gpu',
-          '--disable-gl-drawing-for-tests',
-          '--window-size=1366,768',
-          '--no-first-run',
-          "--proxy-server='direct://'",
-          '--proxy-bypass-list=*',
-          '--disable-breakpad',
-          '--disable-infobars',
-          '--hide-scrollbars',
-          '--enable-webgl',
-          '--no-zygote',
-          '--disable-2d-canvas-clip-aa',
-          '--disable-features=site-per-process',
-          '--headless',
-        ],
+        // args: [
+        //   '--mute-audio',
+        //   '--no-sandbox',
+        //   '--ignore-certificate-errors',
+        //   '--force-device-scale-factor',
+        //   '--disable-setuid-sandbox',
+        //   '--disable-gpu',
+        //   '--disable-gl-drawing-for-tests',
+        //   '--window-size=1366,768',
+        //   '--no-first-run',
+        //   "--proxy-server='direct://'",
+        //   '--proxy-bypass-list=*',
+        //   '--disable-breakpad',
+        //   '--disable-infobars',
+        //   '--hide-scrollbars',
+        //   '--enable-webgl',
+        //   '--no-zygote',
+        //   '--disable-2d-canvas-clip-aa',
+        //   '--disable-features=site-per-process',
+        //   '--headless',
+        // ],
         headless: true,
         devtools: false,
-        ignoreDefaultArgs: true,
+        // ignoreDefaultArgs: true,
         defaultViewport: {
           width: 1366,
           height: 768,
         },
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-        userDataDir: userDir,
+        // userDataDir: userDir,
+        // protocolTimeout: 90000,
+        // timeout: 90000,
       };
     }
 
-    // return {
-    //   headless: false,
-    //   devtools: false,
-    //   executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-    //   userDataDir: userDir,
-    //   args: [
-    //     '--no-sandbox',
-    //     '--disable-setuid-sandbox',
-    //     '--disable-features=site-per-process',
-    //     process.env.HEADLESS === 'true' ? '--headless' : '',
-    //   ],
-    // };
+    return {
+      headless: false,
+      devtools: false,
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+      userDataDir: userDir,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-features=site-per-process',
+        process.env.HEADLESS === 'true' ? '--headless' : '',
+      ],
+    };
   }
 }
