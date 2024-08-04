@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: tribal-wars-bot-agent
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: tribal-wars-bot-agent
@@ -32,7 +32,7 @@ spec:
       containers:
         - name: tribal-wars-bot-agent
           image: ghcr.io/psalkowski/tribal-wars-bot-agent:1.0.2
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
 
           envFrom:
             - secretRef:
