@@ -84,8 +84,8 @@ export class Browser {
   getPuppeteerOptions(): Parameters<VanillaPuppeteer['launch']>[0] {
     const userDir =
       process.env.BROWSER_ONLY === '1'
-        ? `.browser/user-${getWorldId(store.getState())}`
-        : `.browser/cli-${getWorldId(store.getState())}`;
+        ? `storage/.browser/user-${getWorldId(store.getState())}`
+        : `storage/.browser/cli-${getWorldId(store.getState())}`;
 
     if (process.env.HEADLESS === 'true') {
       return {

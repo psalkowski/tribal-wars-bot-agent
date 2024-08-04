@@ -16,3 +16,4 @@ Dockerfile
 jest.config.js
 README.md
 node_modules
+storage/.browser

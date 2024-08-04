@@ -9,7 +9,7 @@ import { QueueManager } from './manager/queue.manager.js';
 import moment from 'moment';
 import Logger from './core/logger.js';
 import { CaptchaAction } from './actions/captcha.action.js';
-import { writeFileSync } from 'fs';
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
 
 dotenv();
 
@@ -40,12 +40,18 @@ dotenv();
         logger.error('Error occurs');
         logger.error(e);
 
+        const prefix = moment().format('YYYYMMDD_HHmmss');
+
+        if (!existsSync('./storage/reports/')) {
+          mkdirSync('./storage/reports/', { recursive: true });
+        }
+
         await page.screenshot({
-          path: './fails.png',
+          path: `./storage/reports/${prefix}_fails.png`,
           fullPage: true,
         });
 
-        writeFileSync('fails.html', await page.content());
+        writeFileSync(`./storage/reports/${prefix}_fails.html`, await page.content());
 
         await agent.stop();
 

@@ -108,3 +108,10 @@ dist
 
 .browser
 .idea
+
+
+
+storage/reports/*
+storage/.browser/*
+!.gitkeep
+

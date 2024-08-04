@@ -13,5 +13,6 @@ RUN cd dist && yarn workspaces focus --production
 FROM base
 
 COPY --from=build /usr/src/app/dist/ /usr/src/app
+COPY storage/ /usr/src/app/storage
 
 CMD ["/usr/bin/node", "/usr/src/app/index.js"]

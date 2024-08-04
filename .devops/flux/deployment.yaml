@@ -52,4 +52,4 @@ spec:
 
           volumeMounts:
             - name: data
-              mountPath: /usr/src/app/.browser
+              mountPath: /usr/src/app/storage
