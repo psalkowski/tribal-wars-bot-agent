@@ -1,0 +1,17 @@
+dist
+snapshots
+tests
+tools
+tribal_scripts
+.editorconfig
+.env.example
+.eslintignore
+.eslintrc
+.gitignore
+.nvmrc
+.prettierrc
+browser.ts
+index.ts
+Dockerfile
+jest.config.js
+README.md
