@@ -23,6 +23,12 @@ spec:
       imagePullSecrets:
         - name: github-registry
 
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: "tribal-wars-bot-agent-data"
+
+
       containers:
         - name: tribal-wars-bot-agent
           image: ghcr.io/psalkowski/tribal-wars-bot-agent:1.0.2
@@ -43,3 +49,7 @@ spec:
               value: 'http://tribal-wars-bot-server:3333'
             - name: NODE_ENV
               value: 'production'
+
+          volumeMounts:
+            - name: data
+              mountPath: /usr/src/app/.browser
