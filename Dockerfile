@@ -1,21 +1,17 @@
-FROM node:20.9-alpine AS build
+FROM zenika/alpine-chrome:with-node AS base
 
-ENV PUPPETEER_CACHE_DIR="/app/.cache"
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD 1
+ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium-browser
 
-WORKDIR /app
-COPY . /app
+FROM base AS build
 
-RUN apk add git python3 build-base --no-cache
+COPY --chown=chrome . /usr/src/app
+
 RUN yarn install && yarn build && cp package.json ./dist && cp yarn.lock ./dist
 RUN cd dist && yarn workspaces focus --production
 
-FROM node:20.9-alpine
+FROM base
 
-ENV PUPPETEER_CACHE_DIR="/app/.cache"
+COPY --from=build /usr/src/app/dist/ /usr/src/app
 
-WORKDIR /app
-
-COPY --from=build /app/.cache /app/.cache
-COPY --from=build /app/dist/ /app
-
-CMD ["/usr/local/bin/node", "/app/index.js"]
+CMD ["/usr/local/bin/node", "/usr/src/app/index.js"]

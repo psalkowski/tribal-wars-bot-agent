@@ -10,12 +10,10 @@ import { Browser } from './app/core/browser.js';
 
 dotenv();
 
-process.env.HEADLESS = 'false';
+process.env.HEADLESS = 'true';
 
 (async () => {
-  store.dispatch(
-    setAgent({ worldId: process.env.WORLD as string, enabled: true }),
-  );
+  store.dispatch(setAgent({ worldId: process.env.WORLD as string, enabled: true }));
 
   const browser = new Browser();
   await browser.createPage();

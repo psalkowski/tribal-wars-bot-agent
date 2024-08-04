@@ -15,9 +15,7 @@ export class Browser {
 
   async createPage() {
     if (this.initialized) {
-      this.logger.warn(
-        'Browser has been initialized. No need to initialize it again.',
-      );
+      this.logger.warn('Browser has been initialized. No need to initialize it again.');
       return;
     }
 
@@ -70,15 +68,11 @@ export class Browser {
   }
 
   async openInNewWindow(): Promise<Page> {
-    const newPagePromise = new Promise((x) =>
-      this.browser.once('targetcreated', (target) => x(target.page())),
-    );
+    const newPagePromise = new Promise((x) => this.browser.once('targetcreated', (target) => x(target.page())));
 
     const page = await this.getPage();
 
-    await page.evaluate(() =>
-      window.open('about:blank', '_blank', 'location=0'),
-    );
+    await page.evaluate(() => window.open('about:blank', '_blank', 'location=0'));
 
     return newPagePromise as Promise<Page>;
   }
@@ -93,59 +87,52 @@ export class Browser {
         ? `.browser/user-${getWorldId(store.getState())}`
         : `.browser/cli-${getWorldId(store.getState())}`;
 
-    // if (process.env.HEADLESS === "true" && process.env.BROWSER_ONLY !== "1") {
-    //   return {
-    //     args: [
-    //       "--mute-audio",
-    //       "--no-sandbox",
-    //       "--ignore-certificate-errors",
-    //       "--force-device-scale-factor",
-    //       "--disable-setuid-sandbox",
-    //       "--disable-gpu",
-    //       "--disable-gl-drawing-for-tests",
-    //       "--window-size=1366,768",
-    //       "--no-first-run",
-    //       "--proxy-server='direct://'",
-    //       "--proxy-bypass-list=*",
-    //       "--disable-breakpad",
-    //       "--disable-infobars",
-    //       "--hide-scrollbars",
-    //       "--enable-webgl",
-    //       "--no-zygote",
-    //       "--disable-2d-canvas-clip-aa",
-    //       "--disable-features=site-per-process",
-    //       process.env.HEADLESS === "true" ? "--headless" : "",
-    //     ],
-    //     headless: process.env.HEADLESS === "true",
-    //     devtools: false,
-    //     ignoreDefaultArgs: true,
-    //     defaultViewport: {
-    //       width: 1366,
-    //       height: 768,
-    //     },
-    //     ...(process.env.BROWSER_BIN
-    //       ? { executablePath: process.env.BROWSER_BIN }
-    //       : {}),
-    //     userDataDir: userDir,
-    //   };
-    // }
+    if (process.env.HEADLESS === 'true') {
+      return {
+        args: [
+          '--mute-audio',
+          '--no-sandbox',
+          '--ignore-certificate-errors',
+          '--force-device-scale-factor',
+          '--disable-setuid-sandbox',
+          '--disable-gpu',
+          '--disable-gl-drawing-for-tests',
+          '--window-size=1366,768',
+          '--no-first-run',
+          "--proxy-server='direct://'",
+          '--proxy-bypass-list=*',
+          '--disable-breakpad',
+          '--disable-infobars',
+          '--hide-scrollbars',
+          '--enable-webgl',
+          '--no-zygote',
+          '--disable-2d-canvas-clip-aa',
+          '--disable-features=site-per-process',
+          '--headless',
+        ],
+        headless: true,
+        devtools: false,
+        ignoreDefaultArgs: true,
+        defaultViewport: {
+          width: 1366,
+          height: 768,
+        },
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+        userDataDir: userDir,
+      };
+    }
 
-    return {
-      headless: false,
-      devtools: false,
-      executablePath: process.env.BROWSER_BIN,
-      userDataDir: userDir,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-features=site-per-process',
-        process.env.HEADLESS === 'true' && process.env.BROWSER_ONLY !== '1'
-          ? '--headless'
-          : '',
-      ],
-      ...(process.env.BROWSER_BIN
-        ? { executablePath: process.env.BROWSER_BIN }
-        : {}),
-    };
+    // return {
+    //   headless: false,
+    //   devtools: false,
+    //   executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+    //   userDataDir: userDir,
+    //   args: [
+    //     '--no-sandbox',
+    //     '--disable-setuid-sandbox',
+    //     '--disable-features=site-per-process',
+    //     process.env.HEADLESS === 'true' ? '--headless' : '',
+    //   ],
+    // };
   }
 }
