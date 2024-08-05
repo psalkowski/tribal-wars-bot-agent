@@ -6,6 +6,7 @@ import { Browser as PuppeteerBrowser, Page } from 'puppeteer';
 import { getWorldId } from '../store/slices/agent.slice.js';
 import { store } from '../store/store.js';
 import Logger from './logger.js';
+import { getAppDir } from '../utils/directory.js';
 
 @Service()
 export class Browser {
@@ -85,8 +86,8 @@ export class Browser {
   getPuppeteerOptions(): Parameters<VanillaPuppeteer['launch']>[0] {
     const userDir =
       process.env.BROWSER_ONLY === '1'
-        ? `storage/.browser/user-${getWorldId(store.getState())}`
-        : `storage/.browser/cli-${getWorldId(store.getState())}`;
+        ? getAppDir(`storage/.browser/user-${getWorldId(store.getState())}`)
+        : getAppDir(`storage/.browser/cli-${getWorldId(store.getState())}`);
 
     if (process.env.HEADLESS === 'true') {
       return {

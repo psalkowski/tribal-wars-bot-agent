@@ -4,6 +4,7 @@ import { Container } from 'typedi';
 import { Agent } from './agent.js';
 import moment from 'moment';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { getAppDir } from '../utils/directory.js';
 
 export const setupErrorHandling = () => {
   let lastErrorTime = moment().valueOf();
@@ -17,18 +18,18 @@ export const setupErrorHandling = () => {
 
     const prefix = moment().format('YYYYMMDD_HHmmss');
 
-    if (!existsSync('./storage/reports/')) {
-      mkdirSync('./storage/reports/', { recursive: true });
+    if (!existsSync(getAppDir('./storage/reports/'))) {
+      mkdirSync(getAppDir('./storage/reports/'), { recursive: true });
     }
 
     const page = await agent.browser.getPage();
     await page.screenshot({
-      path: `./storage/reports/${prefix}_error.png`,
+      path: getAppDir(`./storage/reports/${prefix}_error.png`),
       fullPage: true,
     });
 
-    writeFileSync(`./storage/reports/${prefix}_error.html`, await page.content());
-    writeFileSync(`./storage/reports/${prefix}_error.log`, reason);
+    writeFileSync(getAppDir(`./storage/reports/${prefix}_error.html`), await page.content());
+    writeFileSync(getAppDir(`./storage/reports/${prefix}_error.log`), reason);
 
     await agent.stop();
     await wait(3000);

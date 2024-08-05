@@ -53,10 +53,14 @@ spec:
                 name: tribal-wars-bot-agent
 
           env:
+            - name: TZ
+              value: "Europe/Warsaw"
             - name: WORLD
               value: 'pl203'
             - name: HEADLESS
               value: 'true'
+            - name: ROOT_DIR
+              value: /usr/src/app
             - name: AGENT_ID
               value: 'raspberry'
             - name: BACKEND_API
