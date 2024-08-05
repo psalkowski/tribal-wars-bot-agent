@@ -2,7 +2,6 @@ import { CheckAction } from '../composite/check.action.js';
 import { SetupAction } from '../composite/setup.action.js';
 import { Page } from 'puppeteer';
 import { waitLikeHuman } from '../utils/wait.js';
-import { log } from '../logger/logger.js';
 import { FarmAction } from '../composite/farm.action.js';
 import { Game } from '../game/game.js';
 import { OpenVillageAction } from '../composite/open-village.action.js';
@@ -20,8 +19,10 @@ import { Container } from 'typedi';
 import { ReadReportsAction } from '../actions/read-reports.action.js';
 import Navigation from '../core/navigation.js';
 import { ScreenType } from '../constants/screen.js';
+import Logger from '../core/logger.js';
 
 export abstract class ActionManager {
+  private static readonly logger = Logger.getLogger('ActionManager');
   static setup: SetupAction = new SetupAction();
   // static wait = new WaitAction(60000, 180000);
 
@@ -35,7 +36,7 @@ export abstract class ActionManager {
     const battleReportAction = Container.get(ReadReportsAction);
     const navigation = Container.get(Navigation);
     const game = Container.get(Game);
-    log('Action Manager started.');
+    this.logger.log('Action Manager started.');
 
     await this.setup.handle(page);
     await navigation.goToScreen(ScreenType.OVERVIEW);
@@ -56,7 +57,7 @@ export abstract class ActionManager {
       }
 
       if (game.isAttackPhase()) {
-        console.log('BREAK IS ATTACK PHASE 2222');
+        this.logger.log('BREAK IS ATTACK PHASE 2222');
         break;
       }
 
@@ -78,10 +79,9 @@ export abstract class ActionManager {
       const action = this.getFarmAction(village);
       const isSupported = await action.isSupported(page);
 
-      log(`[${action.name}] isSupported: `, isSupported);
       if (isSupported) {
-        log(`[${action.name}] Handle`);
         await waitLikeHuman();
+        this.logger.log('Handle next action:', action.name);
         await action.handle(page);
       }
     }
@@ -91,8 +91,9 @@ export abstract class ActionManager {
     }
 
     // await this.wait.handle(page);
+    await navigation.goToScreen(ScreenType.OVERVIEW);
 
-    log('Action Manager finished.');
+    this.logger.log('Action Manager finished.');
   }
 
   static getFarmAction(village: IPlayerVillage) {

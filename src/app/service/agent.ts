@@ -2,15 +2,14 @@ import { Bot } from '../bot.js';
 import { clearTimeouts } from '../utils/timeout.js';
 import * as Configurations from '../../config/index.js';
 import { Config } from '../constants/config.js';
-import { store } from '../store/store.js';
-import { getWorldId, isAgentEnabled, registerAgent } from '../store/slices/agent.slice.js';
+import { dispatch, store } from '../store/store.js';
+import { fetchAgent, getWorldId, isAgentEnabled, registerAgent, stopAgent } from '../store/slices/agent.slice.js';
 import { Service } from 'typedi';
 import { Browser } from '../core/browser.js';
 import Logger from '../core/logger.js';
 import { Page } from 'puppeteer';
 import { CaptchaAction } from '../actions/captcha.action.js';
 import { wait, waitLikeHuman } from '../utils/wait.js';
-import { parseTribalWarsUrl } from './navigation.js';
 import moment from 'moment';
 
 @Service()
@@ -25,12 +24,11 @@ export class Agent {
   }
 
   async start() {
-    if (this.working) {
-      this.logger.info('Is working...');
-      return;
+    if (!this.working) {
+      await store.dispatch(registerAgent()).unwrap();
+    } else {
+      await store.dispatch(fetchAgent()).unwrap();
     }
-
-    await store.dispatch(registerAgent()).unwrap();
 
     if (!isAgentEnabled(store.getState())) {
       this.logger.info('Agent is not enabled');
@@ -45,8 +43,6 @@ export class Agent {
 
     this.logger.log('Start agent.', { world });
     await this.runBot(page, config);
-
-    await this.stop();
   }
 
   async runBot(page: Page, config: Config): Promise<void> {
@@ -88,9 +84,12 @@ export class Agent {
   async stop() {
     this.logger.log('Stop agent gracefully.');
 
+    await dispatch(stopAgent()).unwrap();
+
     clearTimeouts();
     this.working = false;
 
     await this.browser.close();
+    this.browser = null;
   }
 }

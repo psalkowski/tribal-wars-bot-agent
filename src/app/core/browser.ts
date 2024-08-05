@@ -17,7 +17,8 @@ export class Browser {
   async createPage() {
     if (this.initialized) {
       this.logger.warn('Browser has been initialized. No need to initialize it again.');
-      return;
+
+      return this.getPage();
     }
 
     if (!this.browser) {
@@ -29,7 +30,12 @@ export class Browser {
     page.setDefaultTimeout(15000);
     page.setDefaultNavigationTimeout(30000);
 
-    // await this.page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36');
+    await page.setUserAgent(
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
+    );
+
+    this.initialized = true;
+
     return page;
   }
 
@@ -119,6 +125,7 @@ export class Browser {
           width: 1366,
           height: 768,
         },
+        userDataDir: userDir,
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
         // userDataDir: userDir,
         // protocolTimeout: 90000,

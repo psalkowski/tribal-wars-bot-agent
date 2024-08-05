@@ -1,7 +1,6 @@
 import { Action } from './action.js';
 import { JSHandle, Page } from 'puppeteer';
 import { BrowserInstance } from '../service/browser.js';
-import { log } from '../logger/logger.js';
 import { scrollIntoViewport } from '../utils/scroll-into-viewport.js';
 import { ALL_ARMY_TYPES } from '../constants/army.js';
 import { getQueryParams } from '../utils/query.js';
@@ -14,8 +13,11 @@ import moment from 'moment';
 import { FarmManager } from '../manager/farm.manager.js';
 import { Container } from 'typedi';
 import { objectKeys } from '../utils/object.js';
+import Logger from '../core/logger.js';
 
 export class FarmVillageAction extends Action {
+  private readonly logger = Logger.getLogger('FarmVillageAction');
+
   name = 'FarmVillageAction';
   action = new CheckAction();
   count = 0;
@@ -46,13 +48,8 @@ export class FarmVillageAction extends Action {
     for (const command of commands) {
       const commandRunAt = command.runAt - 600000; // 10 minutes earlier army should be ready
 
-      if (
-        intersects(command.army.squad, army.squad) &&
-        now + armyDuration > commandRunAt
-      ) {
-        log(
-          `[${this.name}] Can not send farm because is too far and we need army for attack.`,
-        );
+      if (intersects(command.army.squad, army.squad) && now + armyDuration > commandRunAt) {
+        this.logger.log('Can not send farm because is too far and we need army for attack.');
         return false;
       }
     }
@@ -71,27 +68,22 @@ export class FarmVillageAction extends Action {
     const commands = this.game.getVillageCommands(Number(village));
 
     if (!templateA) {
-      log(`[${this.name}] Can not proceed, back to overview`);
+      this.logger.log('Can not proceed, back to overview');
       return null;
     }
 
     const rawStats = await this.getStats(page);
-    const stats = rawStats.filter((stat: any) =>
-      this.canSendFarm(stat, commands, army),
-    );
+    const stats = rawStats.filter((stat: any) => this.canSendFarm(stat, commands, army));
 
     // if there are raw stats, but there is no filtered, that mean,
     // we can not sent any more attack farm, because we need army for real attack
     if (!stats.length && rawStats.length) {
-      log(`[${this.name}] Skipping, we need army for attack.`);
+      this.logger.log(`Skipping, we need army for attack.`);
       return null;
     }
 
     const filtered = stats.filter((stat: any) =>
-      farmManager.canFarm(
-        stat.coordinate,
-        army.getAttackDuration() * Number(stat.distance),
-      ),
+      farmManager.canFarm(stat.coordinate, army.getAttackDuration() * Number(stat.distance)),
     );
     if (filtered.length) {
       const next = filtered.shift();
@@ -104,7 +96,7 @@ export class FarmVillageAction extends Action {
         }
 
         const template = templateA ? '.farm_icon_a' : null;
-        log(`[${this.name}] next farm`, next, template);
+        this.logger.log(`Next farm`, next, template);
 
         if (!template) {
           return null;
@@ -116,7 +108,7 @@ export class FarmVillageAction extends Action {
         const className = (await prop.jsonValue()) as string;
 
         if (className.split(' ').includes('farm_icon_disabled')) {
-          log(`[${this.name}] Button contain disabled class name`);
+          this.logger.log(`Button contain disabled class name`);
           return null;
         }
 
@@ -131,7 +123,7 @@ export class FarmVillageAction extends Action {
         //   army,
         // );
 
-        log(`[${this.name}] Attack has been sent`);
+        this.logger.log(`Attack has been sent`);
 
         if (this.target !== next.id) {
           this.count = 0;
@@ -181,20 +173,13 @@ export class FarmVillageAction extends Action {
         })
         .filter(Boolean)[0];
 
-      const rows = Array.from(
-        document.querySelectorAll('#plunder_list tr[id*=village]'),
-      );
+      const rows = Array.from(document.querySelectorAll('#plunder_list tr[id*=village]'));
 
       return (
         rows
           // .filter(row => !row.querySelector('img[src*="attack.png"]'))
           .filter((row) => row.querySelector('img[src$="green.png"]'))
-          .filter(
-            (row) =>
-              !row
-                .querySelector('.farm_icon_a')
-                .classList.contains('farm_icon_disabled'),
-          )
+          .filter((row) => !row.querySelector('.farm_icon_a').classList.contains('farm_icon_disabled'))
           .map((row: any) => {
             const toNumber = (str: string) => Number(str.replace(/[\s.]/g, ''));
             const getResourceAmount = (element: HTMLElement, type: string) => {
@@ -205,8 +190,7 @@ export class FarmVillageAction extends Action {
                 return 9999;
               }
 
-              const amountElement =
-                iconElement.nextElementSibling as HTMLElement;
+              const amountElement = iconElement.nextElementSibling as HTMLElement;
 
               return toNumber(amountElement.innerText);
             };
@@ -214,13 +198,8 @@ export class FarmVillageAction extends Action {
             const stone = getResourceAmount(row, 'stone');
             const wood = getResourceAmount(row, 'wood');
             const iron = getResourceAmount(row, 'iron');
-            const village = row.querySelector(
-              'td:nth-child(4) > a',
-            ).textContent;
-            const distance = Number(
-              row.querySelector(`td:nth-child(${distanceIndex + 1})`)
-                .textContent,
-            );
+            const village = row.querySelector('td:nth-child(4) > a').textContent;
+            const distance = Number(row.querySelector(`td:nth-child(${distanceIndex + 1})`).textContent);
 
             return {
               stone,
@@ -243,10 +222,7 @@ export class FarmVillageAction extends Action {
     if (currentPage !== null) {
       await scrollIntoViewport(page, '#plunder_list_nav strong.paged-nav-item');
 
-      return await page.evaluateHandle(
-        (el) => el.nextElementSibling,
-        currentPage,
-      );
+      return await page.evaluateHandle((el) => el.nextElementSibling, currentPage);
     }
 
     return null;
@@ -274,9 +250,7 @@ const getTemplates = async () => {
   const page = BrowserInstance.getPage();
 
   return await page.evaluate(() => {
-    const forms = Array.from(
-      document.querySelectorAll('form[action*="mode=farm"]'),
-    );
+    const forms = Array.from(document.querySelectorAll('form[action*="mode=farm"]'));
 
     return forms.map((form) => {
       const value: any = {};

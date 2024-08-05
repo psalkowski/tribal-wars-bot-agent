@@ -1,20 +1,21 @@
-import { log } from '../logger/logger.js';
 import { wait } from '../utils/wait.js';
 import { Container } from 'typedi';
 import { Agent } from './agent.js';
 import moment from 'moment';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
 import { getAppDir } from '../utils/directory.js';
+import Logger from '../core/logger.js';
+
+const logger = Logger.getLogger('ErrorHandler');
 
 export const setupErrorHandling = () => {
   let lastErrorTime = moment().valueOf();
 
   const handleError = async (reason: string) => {
     const agent = Container.get(Agent);
-
     const now = moment().valueOf();
 
-    log('Unhandled error:', reason);
+    logger.error('Unhandled error:', reason);
 
     const prefix = moment().format('YYYYMMDD_HHmmss');
 
@@ -23,13 +24,17 @@ export const setupErrorHandling = () => {
     }
 
     const page = await agent.browser.getPage();
-    await page.screenshot({
-      path: getAppDir(`./storage/reports/${prefix}_error.png`),
-      fullPage: true,
-    });
 
-    writeFileSync(getAppDir(`./storage/reports/${prefix}_error.html`), await page.content());
-    writeFileSync(getAppDir(`./storage/reports/${prefix}_error.log`), reason);
+    if (page) {
+      await page.screenshot({
+        path: getAppDir(`./storage/reports/${prefix}_error.png`),
+        fullPage: true,
+      });
+
+      writeFileSync(getAppDir(`./storage/reports/${prefix}_error.html`), await page.content());
+    }
+
+    writeFileSync(getAppDir(`./storage/reports/${prefix}_error.log`), reason.toString());
 
     await agent.stop();
     await wait(3000);
@@ -37,7 +42,7 @@ export const setupErrorHandling = () => {
     // if errors occurs often than each 60 sec, abort
     if (now - lastErrorTime < 60000) {
       do {
-        log('Error occurs often than once per minute. Going into sleep mode.');
+        logger.warn('Error occurs often than once per minute. Going into sleep mode.');
         await wait(300000);
       } while (true);
     }

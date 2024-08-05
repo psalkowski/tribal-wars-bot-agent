@@ -1,20 +1,21 @@
 import puppeteer from 'puppeteer-extra';
 import RecaptchaPlugin from 'puppeteer-extra-plugin-recaptcha';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
-import { warn } from '../logger/logger.js';
 import { Browser, Page } from 'puppeteer';
 
 import { getWorldId } from '../store/slices/agent.slice.js';
 import { store } from '../store/store.js';
+import Logger from '../core/logger.js';
 
 class BrowserInstanceSingleton {
+  private readonly logger = Logger.getLogger('Browser');
   private browser: Browser;
   private page: Page;
   private initialized = false;
 
   async start() {
     if (this.initialized) {
-      warn('Browser has been initialized. No need to initialize it again.');
+      this.logger.warn('Browser has been initialized. No need to initialize it again.');
       return;
     }
 
@@ -54,13 +55,9 @@ class BrowserInstanceSingleton {
   }
 
   async openInNewWindow(): Promise<Page> {
-    const newPagePromise = new Promise((x) =>
-      this.browser.once('targetcreated', (target) => x(target.page())),
-    );
+    const newPagePromise = new Promise((x) => this.browser.once('targetcreated', (target) => x(target.page())));
 
-    await this.page.evaluate(() =>
-      window.open('about:blank', '_blank', 'location=0'),
-    );
+    await this.page.evaluate(() => window.open('about:blank', '_blank', 'location=0'));
 
     return newPagePromise as Promise<Page>;
   }
@@ -130,13 +127,9 @@ class BrowserInstanceSingleton {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-features=site-per-process',
-        process.env.HEADLESS === 'true' && process.env.BROWSER_ONLY !== '1'
-          ? '--headless'
-          : '',
+        process.env.HEADLESS === 'true' && process.env.BROWSER_ONLY !== '1' ? '--headless' : '',
       ],
-      ...(process.env.BROWSER_BIN
-        ? { executablePath: process.env.BROWSER_BIN }
-        : {}),
+      ...(process.env.BROWSER_BIN ? { executablePath: process.env.BROWSER_BIN } : {}),
     };
   }
 }

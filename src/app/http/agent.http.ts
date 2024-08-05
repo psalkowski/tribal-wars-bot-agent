@@ -13,4 +13,12 @@ export class AgentHttp {
   registerAgent() {
     return this.api.post('/agent', { world: process.env.WORLD });
   }
+
+  stopAgent(): Promise<IAgent> {
+    return this.api.post('/agent/stop');
+  }
+
+  startAgent(): Promise<IAgent> {
+    return this.api.post('/agent/start');
+  }
 }

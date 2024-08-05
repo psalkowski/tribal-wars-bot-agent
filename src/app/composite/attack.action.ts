@@ -4,15 +4,17 @@ import { Action } from '../actions/action.js';
 import { wait } from '../utils/wait.js';
 import { BrowserInstance } from '../service/browser.js';
 import { AttackCommand } from '../commands/attack.command.js';
-import { log } from '../logger/logger.js';
 import moment from 'moment';
 import { ALL_ARMY_TYPES } from '../constants/army.js';
 import { Latency } from '../utils/latency.js';
 import { Game } from '../game/game.js';
 import { Container } from 'typedi';
+import Logger from '../core/logger.js';
 
 export class AttackAction extends CompositeAction {
-  private command: AttackCommand;
+  protected readonly logger = Logger.getLogger('AttackAction');
+
+  private readonly command: AttackCommand;
 
   constructor(command: AttackCommand) {
     super();
@@ -22,9 +24,7 @@ export class AttackAction extends CompositeAction {
 
   async handle(page: Page): Promise<Action> {
     const game = Container.get(Game);
-    const commandPage = await this.openPage(
-      game.getPlaceUrl(this.command.source),
-    );
+    const commandPage = await this.openPage(game.getPlaceUrl(this.command.source));
     const latency = await Latency.getLatency(commandPage.url());
 
     try {
@@ -48,10 +48,8 @@ export class AttackAction extends CompositeAction {
         { runAt: this.command.runAt, latency },
       );
 
-      log(
-        '[' +
-          this.command.village.id +
-          '] Finalizing attacks. Should arrive at',
+      this.logger.log(
+        '[' + this.command.village.id + '] Finalizing attacks. Should arrive at',
         moment(this.command.arriveAt).format('HH:mm:ss.SSS'),
         'with ',
         this.command.army.squad,
@@ -63,7 +61,6 @@ export class AttackAction extends CompositeAction {
     await wait(2000);
     await commandPage.close();
 
-    log('Finished');
     return null;
   }
 
@@ -95,24 +92,13 @@ export class AttackAction extends CompositeAction {
       const amount = squad[name];
 
       if (amount > 0) {
-        await this.setValue(
-          page,
-          `#command-data-form input[name="${name}"]`,
-          squad[name],
-        );
+        await this.setValue(page, `#command-data-form input[name="${name}"]`, squad[name]);
       } else {
         const element = await page.$(`#units_entry_all_${name}`);
-        const text = await page.evaluate(
-          (element) => element.textContent,
-          element,
-        );
+        const text = await page.evaluate((element) => element.textContent, element);
         const all = text.replace('(', '').replace(')', '');
 
-        await this.setValue(
-          page,
-          `#command-data-form input[name="${name}"]`,
-          all,
-        );
+        await this.setValue(page, `#command-data-form input[name="${name}"]`, all);
       }
     });
 
@@ -124,9 +110,7 @@ export class AttackAction extends CompositeAction {
   }
 
   async clickAttackOrDefense(page: Page) {
-    const selector = this.command.isAttack()
-      ? '#target_attack'
-      : '#target_support';
+    const selector = this.command.isAttack() ? '#target_attack' : '#target_support';
 
     await page.waitForSelector(selector);
     await page.$eval(selector, (element: any) => element.click());

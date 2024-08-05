@@ -36,7 +36,7 @@ export default class Navigation {
     const url = new URL(this.getGameUrl(screen));
 
     objectKeys(extraParams).forEach((key) => {
-      url.searchParams.append(key, extraParams[key]);
+      url.searchParams.append(key, extraParams[key] || '');
     });
 
     this.logger.debug(`Go to ${screen}`, url.toString());

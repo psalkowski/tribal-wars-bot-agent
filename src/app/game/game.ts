@@ -1,6 +1,5 @@
 import { AttackCommand } from '../commands/attack.command.js';
 import { AttackAction } from '../composite/attack.action.js';
-import { log } from '../logger/logger.js';
 import moment from 'moment';
 import { Coordinate } from '../models/coordinate.js';
 import { Army } from './army.js';
@@ -11,9 +10,11 @@ import { parseTribalWarsUrl } from '../service/navigation.js';
 import { TribalWarsUrls } from '../constants/urls.js';
 import { Page } from 'puppeteer';
 import { IArmy } from '../models/army.js';
+import Logger from '../core/logger.js';
 
 @Service()
 export class Game {
+  private readonly logger = Logger.getLogger('Game');
   config: Config;
   commands: AttackCommand[] = [];
   templates: { [key: number]: Army[] } = {};
@@ -103,7 +104,7 @@ export class Game {
       return null;
     }
 
-    log(
+    this.logger.log(
       `[${village.id}] send attack at `,
       moment(command.runAt).format('DD.MM.YYYY HH:mm:ss.SSS'),
       'and should arrive at',

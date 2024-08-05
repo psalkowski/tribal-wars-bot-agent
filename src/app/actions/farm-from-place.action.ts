@@ -3,7 +3,7 @@ import { Page } from 'puppeteer';
 import { Action } from './action.js';
 import { waitLikeHuman } from '../utils/wait.js';
 
-import { ALL_ARMY_TYPES, ArmyUnit } from '../constants/army.js';
+import { ArmyUnit } from '../constants/army.js';
 import { Coordinate } from '../models/coordinate.js';
 import { Army } from '../game/army.js';
 import { FarmManager } from '../manager/farm.manager.js';

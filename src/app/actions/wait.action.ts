@@ -1,23 +1,19 @@
 import { Action } from './action.js';
 import { wait } from '../utils/wait.js';
 import { Page } from 'puppeteer';
-import {
-  HUMAN_REACTION_MAX_MS,
-  HUMAN_REACTION_MIN_MS,
-} from '../constants/human.js';
+import { HUMAN_REACTION_MAX_MS, HUMAN_REACTION_MIN_MS } from '../constants/human.js';
 import { random } from '../utils/random.js';
 import { log } from '../logger/logger.js';
+import Logger from '../core/logger.js';
 
 export class WaitAction extends Action {
+  private readonly logger = Logger.getLogger('WaitAction');
   name = 'WaitAction';
 
   private readonly min: number;
   private readonly max: number;
 
-  constructor(
-    min: number = HUMAN_REACTION_MIN_MS,
-    max: number = HUMAN_REACTION_MAX_MS,
-  ) {
+  constructor(min: number = HUMAN_REACTION_MIN_MS, max: number = HUMAN_REACTION_MAX_MS) {
     super(0);
 
     this.min = min;
@@ -27,7 +23,7 @@ export class WaitAction extends Action {
   async handle(page: Page): Promise<Action> {
     const time = random(this.min, this.max);
 
-    log(`[${this.name}] Waiting ${time / 1000}s`);
+    this.logger.log(`Waiting ${time / 1000}s`);
 
     await wait(time);
 

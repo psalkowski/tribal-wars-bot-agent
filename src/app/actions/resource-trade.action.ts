@@ -7,12 +7,13 @@ import { CheckAction } from '../composite/check.action.js';
 import { Resource } from '../constants/resource.js';
 import { average } from '../utils/average.js';
 import { MAX_RESOURCE_DIFF } from '../constants/app.js';
-import { log } from '../logger/logger.js';
 import { OpenOverviewAction } from './open-overview.action.js';
 import { waitLikeHuman } from '../utils/wait.js';
 import { toNumber } from '../utils/number.js';
+import Logger from '../core/logger.js';
 
 export class ResourceTradeAction extends Action {
+  private readonly logger = Logger.getLogger('ResourceTradeAction');
   name = 'ResourceTradeAction';
   overview = new OpenOverviewAction();
   check = new CheckAction();
@@ -83,29 +84,14 @@ export class ResourceTradeAction extends Action {
 
   async createTrade(page: Page, trade: any): Promise<any> {
     const availableTrades = Number(
-      await page.evaluate(
-        () =>
-          document.querySelector('#market_merchant_available_count')
-            .textContent,
-      ),
+      await page.evaluate(() => document.querySelector('#market_merchant_available_count').textContent),
     );
-    const count =
-      availableTrades < trade.amount ? availableTrades : trade.amount;
+    const count = availableTrades < trade.amount ? availableTrades : trade.amount;
 
-    log(
-      `[${this.name}] Available trades`,
-      availableTrades,
-      'trade needed',
-      trade.amount,
-      'trade calculated',
-      count,
-    );
+    this.logger.log(`Available trades`, availableTrades, 'trade needed', trade.amount, 'trade calculated', count);
 
     if (count === 0) {
-      log(
-        `[${this.name}] Skipping, because not enough available trades for`,
-        trade,
-      );
+      this.logger.log(`Skipping, because not enough available trades for`, trade);
       return null;
     }
 
@@ -124,7 +110,7 @@ export class ResourceTradeAction extends Action {
       await timeElement.type('5');
     }
 
-    log(`[${this.name}] Created trade`, trade);
+    this.logger.log(`Created trade`, trade);
 
     await page.click('input[type="submit"]');
     await waitLikeHuman();
@@ -138,14 +124,9 @@ export class ResourceTradeAction extends Action {
   }
 
   getTrades(resources: any, currentTrades: any[]) {
-    const resourcesWithCurrentTrades = this.applyCurrentTrades(
-      resources,
-      currentTrades,
-    );
+    const resourcesWithCurrentTrades = this.applyCurrentTrades(resources, currentTrades);
     const resourceAfterTrades = { ...resourcesWithCurrentTrades };
-    const middle = Math.floor(
-      average(Object.values(resourcesWithCurrentTrades)),
-    );
+    const middle = Math.floor(average(Object.values(resourcesWithCurrentTrades)));
     const belowAvg = [];
     const aboveAvg = [];
     const trades = [];
@@ -155,9 +136,7 @@ export class ResourceTradeAction extends Action {
         continue;
       }
 
-      if (
-        Math.abs(resourcesWithCurrentTrades[prop] - middle) < MAX_RESOURCE_DIFF
-      ) {
+      if (Math.abs(resourcesWithCurrentTrades[prop] - middle) < MAX_RESOURCE_DIFF) {
         continue;
       }
 
@@ -179,13 +158,9 @@ export class ResourceTradeAction extends Action {
 
       for (const needs of belowAvg) {
         const amountNeeded = middle - needs.value;
-        const amountGiven =
-          amountNeeded > amountAboveAvg
-            ? amountAboveAvg
-            : amountAboveAvg - amountNeeded;
+        const amountGiven = amountNeeded > amountAboveAvg ? amountAboveAvg : amountAboveAvg - amountNeeded;
 
-        resourceAfterTrades[res.type] =
-          resourceAfterTrades[res.type] - amountGiven;
+        resourceAfterTrades[res.type] = resourceAfterTrades[res.type] - amountGiven;
 
         trades.push({
           from: res.type,
@@ -204,9 +179,7 @@ export class ResourceTradeAction extends Action {
 
     if (ownOffersTable) {
       const ownOffers = await page.$eval('#own_offers_table', (table) => {
-        const rows = Array.from(
-          table.querySelectorAll('.offer_container'),
-        ).filter(Boolean);
+        const rows = Array.from(table.querySelectorAll('.offer_container')).filter(Boolean);
 
         return rows.map((row: any) => {
           const count = Number(row.dataset.count);
@@ -226,21 +199,14 @@ export class ResourceTradeAction extends Action {
       results = [...results, ...ownOffers];
     }
 
-    const currentTransports = await page.$(
-      '#market_status_bar table:nth-child(2)',
-    );
+    const currentTransports = await page.$('#market_status_bar table:nth-child(2)');
     if (currentTransports) {
-      const transports = await currentTransports.$$(
-        'th:nth-child(1) span.nowrap',
-      );
+      const transports = await currentTransports.$$('th:nth-child(1) span.nowrap');
       const array = Array.from(transports);
 
       for (const element of array) {
         const icon = await element.$('.icon');
-        const type = await page.evaluate(
-          (e) => e.className.match(/(wood|iron|stone)/)[0],
-          icon,
-        );
+        const type = await page.evaluate((e) => e.className.match(/(wood|iron|stone)/)[0], icon);
         const amount = await page.evaluate((e) => e.textContent, element);
 
         results.push({
@@ -250,7 +216,7 @@ export class ResourceTradeAction extends Action {
       }
     }
 
-    log(`[${this.name}] Existing trades: `, results);
+    this.logger.log(`Existing trades: `, results);
 
     return results;
   }

@@ -1,9 +1,10 @@
 import { Action } from '../actions/action.js';
 import { Page } from 'puppeteer';
 import { wait } from '../utils/wait.js';
-import { log } from '../logger/logger.js';
+import Logger from '../core/logger.js';
 
 export abstract class CompositeAction extends Action {
+  protected readonly logger = Logger.getLogger('CompositeAction');
   name = 'CompositeAction';
   actions: Action[] = [];
 
@@ -22,7 +23,6 @@ export abstract class CompositeAction extends Action {
         }
 
         await this.wait();
-        log(`[${next.name}] handle.`);
       } while ((next = await next?.handle(page)));
     }
 
@@ -30,9 +30,7 @@ export abstract class CompositeAction extends Action {
   }
 
   async isSupported(page: Page): Promise<boolean> {
-    const supported = await Promise.all(
-      this.actions.map(async (action) => await action.isSupported(page)),
-    );
+    const supported = await Promise.all(this.actions.map(async (action) => await action.isSupported(page)));
 
     return supported.includes(true);
   }
@@ -40,9 +38,8 @@ export abstract class CompositeAction extends Action {
   async wait(): Promise<void> {
     const timeout = this.getTimeout();
 
-    log('Wait', timeout);
-
     if (timeout) {
+      this.logger.log('Wait', timeout);
       await wait(timeout);
     }
   }
