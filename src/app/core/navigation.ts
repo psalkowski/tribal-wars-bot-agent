@@ -4,12 +4,16 @@ import { ScreenType } from '../constants/screen.js';
 import { parseTribalWarsUrl } from '../service/navigation.js';
 import { Browser } from './browser.js';
 import { objectKeys } from '../utils/object.js';
+import { CaptchaAction } from '../actions/captcha.action.js';
 
 @Service()
 export default class Navigation {
   private readonly logger = Logger.getLogger('Navigation');
+  private captcha: CaptchaAction;
 
-  constructor(private browser: Browser) {}
+  constructor(private browser: Browser) {
+    this.captcha = new CaptchaAction();
+  }
 
   async goToUrl(url: string) {
     const page = await this.browser.getPage();
@@ -17,12 +21,14 @@ export default class Navigation {
 
     await Promise.all([
       page.waitForNavigation({
-        waitUntil: 'networkidle2',
+        waitUntil: 'networkidle0',
       }),
       page.goto(parseTribalWarsUrl(parsedUrl)),
     ]);
 
-    await page.solveRecaptchas();
+    if (await this.captcha.isSupported(page)) {
+      await this.captcha.handle(page);
+    }
   }
 
   async goToScreen(screen: ScreenType, extraParams = {}) {
@@ -37,11 +43,14 @@ export default class Navigation {
 
     await Promise.all([
       page.waitForNavigation({
-        waitUntil: 'networkidle2',
+        waitUntil: 'networkidle0',
       }),
       page.goto(url.toString()),
     ]);
-    await page.solveRecaptchas();
+
+    if (await this.captcha.isSupported(page)) {
+      await this.captcha.handle(page);
+    }
   }
 
   private getGameUrl(screen: ScreenType) {

@@ -3,15 +3,32 @@ import { wait } from '../utils/wait.js';
 import { Container } from 'typedi';
 import { Agent } from './agent.js';
 import moment from 'moment';
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
 
 export const setupErrorHandling = () => {
   let lastErrorTime = moment().valueOf();
 
   const handleError = async (reason: string) => {
     const agent = Container.get(Agent);
+
     const now = moment().valueOf();
 
     log('Unhandled error:', reason);
+
+    const prefix = moment().format('YYYYMMDD_HHmmss');
+
+    if (!existsSync('./storage/reports/')) {
+      mkdirSync('./storage/reports/', { recursive: true });
+    }
+
+    const page = await agent.browser.getPage();
+    await page.screenshot({
+      path: `./storage/reports/${prefix}_error.png`,
+      fullPage: true,
+    });
+
+    writeFileSync(`./storage/reports/${prefix}_error.html`, await page.content());
+    writeFileSync(`./storage/reports/${prefix}_error.log`, reason);
 
     await agent.stop();
     await wait(3000);

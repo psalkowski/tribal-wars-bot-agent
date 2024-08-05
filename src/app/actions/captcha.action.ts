@@ -1,6 +1,6 @@
 import { Action } from './action.js';
 import { Page } from 'puppeteer';
-import { wait } from '../utils/wait.js';
+import { wait, waitLikeHuman } from '../utils/wait.js';
 import { NoopAction } from './noop.action.js';
 import Logger from '../core/logger.js';
 
@@ -9,6 +9,11 @@ export class CaptchaAction extends Action {
   name = 'CaptchaAction';
 
   async handle(page: Page): Promise<Action> {
+    if (await page.$('#bot_check')) {
+      await page.click('#bot_check a');
+      await waitLikeHuman();
+    }
+
     const { solved, solutions, captchas, error } = await page.solveRecaptchas();
 
     if (error) {

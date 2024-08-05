@@ -34,7 +34,7 @@ export class ReadReportsAction extends Action {
     await Promise.all([
       page.click('.report-link:first-child'),
       page.waitForNavigation({
-        waitUntil: 'domcontentloaded',
+        waitUntil: 'networkidle0',
       }),
     ]);
 
