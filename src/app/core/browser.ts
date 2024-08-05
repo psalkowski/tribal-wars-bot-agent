@@ -25,7 +25,7 @@ export class Browser {
     }
 
     const page = await this.browser.newPage();
-    page.setDefaultTimeout(5000);
+    page.setDefaultTimeout(15000);
     page.setDefaultNavigationTimeout(30000);
 
     // await this.page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36');

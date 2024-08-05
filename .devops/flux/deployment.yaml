@@ -28,6 +28,21 @@ spec:
           persistentVolumeClaim:
             claimName: "tribal-wars-bot-agent-data"
 
+      initContainers:
+        - name: fix-ownership
+          image: alpine:3
+          command:
+            - /bin/sh
+            - -c
+            - |
+              mkdir -p /usr/src/app/storage/reports
+              mkdir -p /usr/src/app/storage/.browser
+              chown -R 1000:1000 /usr/src/app/storage
+
+          volumeMounts:
+            - name: data
+              mountPath: /usr/src/app/storage
+
       containers:
         - name: tribal-wars-bot-agent
           image: ghcr.io/psalkowski/tribal-wars-bot-agent:1.0.2
