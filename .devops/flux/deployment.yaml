@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: tribal-wars-bot-agent
 spec:
-  replicas: 1
+  replicas: 0
   selector:
     matchLabels:
       app: tribal-wars-bot-agent
