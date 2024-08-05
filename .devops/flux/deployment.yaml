@@ -47,7 +47,6 @@ spec:
         - name: tribal-wars-bot-agent
           image: ghcr.io/psalkowski/tribal-wars-bot-agent:1.0.2
           imagePullPolicy: Always
-          restartPolicy: Never
 
           envFrom:
             - secretRef:
