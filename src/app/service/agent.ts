@@ -24,11 +24,7 @@ export class Agent {
   }
 
   async start() {
-    if (!this.working) {
-      await store.dispatch(registerAgent()).unwrap();
-    } else {
-      await store.dispatch(fetchAgent()).unwrap();
-    }
+    await store.dispatch(registerAgent()).unwrap();
 
     if (!isAgentEnabled(store.getState())) {
       this.logger.info('Agent is not enabled');

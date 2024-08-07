@@ -23,7 +23,7 @@ export const setupErrorHandling = () => {
       mkdirSync(getAppDir('./storage/reports/'), { recursive: true });
     }
 
-    const page = await agent.browser.getPage();
+    const page = await agent.browser?.getPage();
 
     if (page) {
       await page.screenshot({
