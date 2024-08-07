@@ -1,7 +1,9 @@
 import { Action } from './action.js';
 import { Page } from 'puppeteer';
 import { TimingInstance } from '../game/timing.js';
+import { Service } from 'typedi';
 
+@Service()
 export class TimingAction extends Action {
   name = 'TimingAction';
 

@@ -1,9 +1,8 @@
 import { Page } from 'puppeteer';
 import { Action } from './action.js';
-import { getWorldId } from '../store/slices/agent.slice.js';
-import { store } from '../store/store.js';
-import { wait } from '../utils/wait.js';
+import { Service } from 'typedi';
 
+@Service()
 export class LoginAction extends Action {
   name = 'LoginAction';
 

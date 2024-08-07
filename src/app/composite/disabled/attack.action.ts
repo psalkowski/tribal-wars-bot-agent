@@ -1,15 +1,15 @@
-import { CompositeAction } from './composite.action.js';
+import { CompositeAction } from '../composite.action.js';
 import { Page } from 'puppeteer';
-import { Action } from '../actions/action.js';
-import { wait } from '../utils/wait.js';
-import { BrowserInstance } from '../service/browser.js';
-import { AttackCommand } from '../commands/attack.command.js';
+import { Action } from '../../actions/action.js';
+import { wait } from '../../utils/wait.js';
+import { BrowserInstance } from '../../service/browser.js';
+import { AttackCommand } from '../../commands/attack.command.js';
 import moment from 'moment';
-import { ALL_ARMY_TYPES } from '../constants/army.js';
-import { Latency } from '../utils/latency.js';
-import { Game } from '../game/game.js';
+import { ALL_ARMY_TYPES } from '../../constants/army.js';
+import { Latency } from '../../utils/latency.js';
+import { Game } from '../../game/game.js';
 import { Container } from 'typedi';
-import Logger from '../core/logger.js';
+import Logger from '../../core/logger.js';
 
 export class AttackAction extends CompositeAction {
   protected readonly logger = Logger.getLogger('AttackAction');

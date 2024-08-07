@@ -1,36 +1,33 @@
-import { Action } from './action.js';
+import { Action } from '../action.js';
 import { JSHandle, Page } from 'puppeteer';
-import { BrowserInstance } from '../service/browser.js';
-import { scrollIntoViewport } from '../utils/scroll-into-viewport.js';
-import { ALL_ARMY_TYPES } from '../constants/army.js';
-import { getQueryParams } from '../utils/query.js';
-import { ScreenType } from '../constants/screen.js';
-import { CheckAction } from '../composite/check.action.js';
-import { Game } from '../game/game.js';
-import { AttackCommand } from '../commands/attack.command.js';
-import { Army } from '../game/army.js';
+import { BrowserInstance } from '../../service/browser.js';
+import { scrollIntoViewport } from '../../utils/scroll-into-viewport.js';
+import { ALL_ARMY_TYPES } from '../../constants/army.js';
+import { getQueryParams } from '../../utils/query.js';
+import { ScreenType } from '../../constants/screen.js';
+import { CheckAction } from '../../composite/check.action.js';
+import { Game } from '../../game/game.js';
+import { AttackCommand } from '../../commands/attack.command.js';
+import { Army } from '../../game/army.js';
 import moment from 'moment';
-import { FarmManager } from '../manager/farm.manager.js';
-import { Container } from 'typedi';
-import { objectKeys } from '../utils/object.js';
-import Logger from '../core/logger.js';
+import { FarmManager } from '../../manager/farm.manager.js';
+import { Container, Service } from 'typedi';
+import { objectKeys } from '../../utils/object.js';
+import Logger from '../../core/logger.js';
 
+@Service()
 export class FarmVillageAction extends Action {
   private readonly logger = Logger.getLogger('FarmVillageAction');
 
   name = 'FarmVillageAction';
-  action = new CheckAction();
   count = 0;
   target: any;
 
-  private game: Game;
-
-  constructor(count = 0, target: any = null) {
+  constructor(private readonly game: Game, private readonly check: CheckAction, count = 0, target: any = null) {
     super();
 
     this.count = count;
     this.target = target;
-    this.game = Container.get(Game);
   }
 
   canSendFarm(stat: any, commands: AttackCommand[], army: Army): boolean {
@@ -58,7 +55,7 @@ export class FarmVillageAction extends Action {
   }
 
   async handle(page: Page): Promise<Action> {
-    await this.action.handle(page);
+    await this.check.handle(page);
 
     const farmManager = Container.get(FarmManager);
     const { village } = getQueryParams(page.url());
@@ -85,6 +82,7 @@ export class FarmVillageAction extends Action {
     const filtered = stats.filter((stat: any) =>
       farmManager.canFarm(stat.coordinate, army.getAttackDuration() * Number(stat.distance)),
     );
+
     if (filtered.length) {
       const next = filtered.shift();
 

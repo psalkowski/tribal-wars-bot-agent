@@ -3,10 +3,11 @@ import puppeteer, { VanillaPuppeteer } from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 import RecaptchaPlugin from 'puppeteer-extra-plugin-recaptcha';
 import { Browser as PuppeteerBrowser, Page } from 'puppeteer';
-import { getWorldId } from '../store/slices/agent.slice.js';
+import { getAgentName, getWorldId } from '../store/slices/agent.slice.js';
 import { store } from '../store/store.js';
 import Logger from './logger.js';
 import { getAppDir } from '../utils/directory.js';
+import { random } from '../utils/random.js';
 
 @Service()
 export class Browser {
@@ -59,7 +60,6 @@ export class Browser {
             token: process.env.CAPTCHA_KEY,
           },
           visualFeedback: true,
-          solveInactiveChallenges: true,
         }),
       )
       .launch(this.getPuppeteerOptions() as any);
@@ -90,10 +90,9 @@ export class Browser {
   }
 
   getPuppeteerOptions(): Parameters<VanillaPuppeteer['launch']>[0] {
-    const userDir =
-      process.env.BROWSER_ONLY === '1'
-        ? getAppDir(`storage/.browser/user-${getWorldId(store.getState())}`)
-        : getAppDir(`storage/.browser/cli-${getWorldId(store.getState())}`);
+    const worldId = getWorldId(store.getState());
+    const agentId = getAgentName(store.getState());
+    const userDir = getAppDir(`storage/.browser/${agentId}-${worldId}`);
 
     if (process.env.HEADLESS === 'true') {
       return {
@@ -122,8 +121,8 @@ export class Browser {
         devtools: false,
         // ignoreDefaultArgs: true,
         defaultViewport: {
-          width: 1366,
-          height: 768,
+          width: random(1000, 1400),
+          height: random(700, 1000),
         },
         userDataDir: userDir,
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
@@ -138,6 +137,7 @@ export class Browser {
       devtools: false,
       executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
       userDataDir: userDir,
+
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',

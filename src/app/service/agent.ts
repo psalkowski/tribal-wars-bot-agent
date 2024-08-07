@@ -3,7 +3,7 @@ import { clearTimeouts } from '../utils/timeout.js';
 import * as Configurations from '../../config/index.js';
 import { Config } from '../constants/config.js';
 import { dispatch, store } from '../store/store.js';
-import { fetchAgent, getWorldId, isAgentEnabled, registerAgent, stopAgent } from '../store/slices/agent.slice.js';
+import { getWorldId, isAgentEnabled, registerAgent, stopAgent } from '../store/slices/agent.slice.js';
 import { Service } from 'typedi';
 import { Browser } from '../core/browser.js';
 import Logger from '../core/logger.js';
@@ -16,12 +16,9 @@ import moment from 'moment';
 export class Agent {
   logger = Logger.getLogger('Agent');
   working = false;
-  captcha: CaptchaAction;
   lastCaptcha = -Infinity;
 
-  constructor(public browser: Browser, public bot: Bot) {
-    this.captcha = new CaptchaAction();
-  }
+  constructor(public browser: Browser, public bot: Bot, private readonly captcha: CaptchaAction) {}
 
   async start() {
     await store.dispatch(registerAgent()).unwrap();
@@ -85,7 +82,7 @@ export class Agent {
     clearTimeouts();
     this.working = false;
 
-    await this.browser.close();
+    await this.browser?.close();
     this.browser = null;
   }
 }

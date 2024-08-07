@@ -2,6 +2,7 @@ import { Action } from '../actions/action.js';
 import { Page } from 'puppeteer';
 import { wait } from '../utils/wait.js';
 import Logger from '../core/logger.js';
+import moment from 'moment';
 
 export abstract class CompositeAction extends Action {
   protected readonly logger = Logger.getLogger('CompositeAction');
@@ -26,11 +27,13 @@ export abstract class CompositeAction extends Action {
       } while ((next = await next?.handle(page)));
     }
 
+    this.lastRunAt = moment().valueOf();
+
     return null;
   }
 
   async isSupported(page: Page): Promise<boolean> {
-    const supported = await Promise.all(this.actions.map(async (action) => await action.isSupported(page)));
+    const supported = await Promise.all(this.actions.map((action) => action.isSupported(page)));
 
     return supported.includes(true);
   }

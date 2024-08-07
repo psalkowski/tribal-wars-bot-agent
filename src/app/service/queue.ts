@@ -27,7 +27,7 @@ export class Queue {
     const actions = [...this.actions];
 
     actions
-      .filter((action) => action.runAt < timestamp)
+      .filter((action) => action.nextRunAt < timestamp)
       .forEach((action) => {
         // action.handle(null);
 

@@ -1,9 +1,7 @@
-import 'reflect-metadata';
 import { config as dotenv } from 'dotenv';
 import { Agent } from './service/agent.js';
-// import { setupTransmit } from './events/index.js';
 import { setupErrorHandling } from './service/error.js';
-import { wait } from './utils/wait.js';
+import { wait, waitLikeHuman } from './utils/wait.js';
 import { Container } from 'typedi';
 import { QueueManager } from './manager/queue.manager.js';
 import moment from 'moment';
@@ -13,7 +11,6 @@ dotenv();
 
 (async () => {
   setupErrorHandling();
-  // setupTransmit();
 
   const queueManager = Container.get(QueueManager);
   const agent = Container.get(Agent);
@@ -21,12 +18,9 @@ dotenv();
 
   /* eslint-disable-next-line no-constant-condition */
   while (true) {
-    logger.log('Start agent');
     await agent.start();
-
-    if (queueManager.shouldCloseAgent()) {
-      await agent.stop();
-    }
+    await waitLikeHuman();
+    await agent.stop();
 
     const nextRun = queueManager.getNextActionTime();
 

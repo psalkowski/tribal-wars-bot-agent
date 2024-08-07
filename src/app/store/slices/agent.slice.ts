@@ -13,6 +13,7 @@ const initialState: SliceState = {
   enabled: false,
   running: false,
   startedAt: null,
+  name: '',
 };
 
 const slice = createSlice({
@@ -20,8 +21,9 @@ const slice = createSlice({
   initialState,
   reducers: {
     setAgent: (state, action: PayloadAction<SliceState>) => {
-      const { worldId, enabled, startedAt, running } = action.payload;
+      const { name, worldId, enabled, startedAt, running } = action.payload;
 
+      state.name = name;
       state.worldId = worldId;
       state.enabled = enabled;
       state.startedAt = startedAt;
@@ -44,6 +46,7 @@ export const isAgentEnabled = createSelector(getState, (agent) => agent.enabled)
 export const getWorldId = createSelector(getState, (agent) => agent.worldId);
 
 export const getStartedAt = createSelector(getState, (agent) => agent.startedAt);
+export const getAgentName = createSelector(getState, (agent) => agent.name);
 
 export const registerAgent = createAsyncThunk('agent/registerAgent', async () => {
   const http = Container.get(AgentHttp);

@@ -1,6 +1,6 @@
 import { Page } from 'puppeteer';
-import { Action } from './action.js';
-import { scrollIntoViewport } from '../utils/scroll-into-viewport.js';
+import { Action } from '../action.js';
+import { scrollIntoViewport } from '../../utils/scroll-into-viewport.js';
 
 export class OpenFarmAssistanceAction extends Action {
   name = 'OpenFarmAssistanceAction';

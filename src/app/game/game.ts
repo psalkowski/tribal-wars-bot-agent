@@ -1,5 +1,5 @@
 import { AttackCommand } from '../commands/attack.command.js';
-import { AttackAction } from '../composite/attack.action.js';
+import { AttackAction } from '../composite/disabled/attack.action.js';
 import moment from 'moment';
 import { Coordinate } from '../models/coordinate.js';
 import { Army } from './army.js';

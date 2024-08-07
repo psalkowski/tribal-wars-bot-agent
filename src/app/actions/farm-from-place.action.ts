@@ -7,29 +7,31 @@ import { ArmyUnit } from '../constants/army.js';
 import { Coordinate } from '../models/coordinate.js';
 import { Army } from '../game/army.js';
 import { FarmManager } from '../manager/farm.manager.js';
-import { IVillage } from '../models/village.js';
-import { parseTribalWarsUrl } from '../service/navigation.js';
-import { TribalWarsUrls } from '../constants/urls.js';
-import { IPlayerVillage } from '../models/player.js';
 import { IArmy } from '../models/army.js';
 import { getArmy } from '../store/slices/army.slice.js';
 import { store } from '../store/store.js';
-import { Container } from 'typedi';
+import { Service } from 'typedi';
 import { objectKeys } from '../utils/object.js';
 import Logger from '../core/logger.js';
 import { sortBy, SortDirection } from '../utils/array.js';
+import { getPlayerVillage } from '../store/slices/player.slice.js';
+import { getBarbarianVillagesWithinDistance } from '../store/slices/world-villages.slice.js';
+import Navigation from '../core/navigation.js';
+import { ScreenType } from '../constants/screen.js';
 
+@Service()
 export class FarmFromPlaceAction extends CompositeAction {
-  private readonly logger = Logger.getLogger('FarmFromPlace');
+  protected readonly logger = Logger.getLogger('FarmFromPlace');
 
   name = 'FarmFromPlace';
 
-  constructor(private village: IPlayerVillage, private barbarians: IVillage[] = []) {
+  constructor(private readonly farmManager: FarmManager, private readonly navigation: Navigation) {
     super();
   }
 
   async handle(page: Page): Promise<Action> {
-    const villageCoordinate = new Coordinate(this.village.x, this.village.y);
+    const village = getPlayerVillage(store.getState());
+    const villageCoordinate = new Coordinate(village.x, village.y);
     const templates = [
       new Army({
         [ArmyUnit.SPEAR]: 20,
@@ -49,14 +51,13 @@ export class FarmFromPlaceAction extends CompositeAction {
       await this.handleArmyTemplate(page, army, villageCoordinate);
     }
 
-    this.logger.log('Finished');
     return null;
   }
 
   async handleArmyTemplate(page: Page, army: Army, villageCoordinate: Coordinate) {
-    const farmManager = Container.get(FarmManager);
+    const barbarians = getBarbarianVillagesWithinDistance(villageCoordinate, 10)(store.getState());
 
-    const targets = this.barbarians
+    const targets = barbarians
       .map((target) => {
         const coordinate = new Coordinate(target.x, target.y);
 
@@ -66,7 +67,7 @@ export class FarmFromPlaceAction extends CompositeAction {
           distance: coordinate.distanceTo(villageCoordinate),
         };
       })
-      .filter((target) => farmManager.canFarm(target.target, army.getAttackDuration() * target.distance))
+      .filter((target) => this.farmManager.canFarm(target.target, army.getAttackDuration() * target.distance))
       .sort(sortBy('distance', SortDirection.ASC));
 
     if (!targets.length) {
@@ -75,12 +76,12 @@ export class FarmFromPlaceAction extends CompositeAction {
     }
 
     for (const target of targets) {
-      await page.goto(parseTribalWarsUrl(TribalWarsUrls.place));
-
       if ((await this.hasAvailableArmy(army.squad)) === false) {
         this.logger.log('Not enough army to send');
         break;
       }
+
+      await this.navigation.goToScreen(ScreenType.PLACE);
 
       await this.prepareAttack(page, army, target.target);
       await waitLikeHuman();
@@ -88,7 +89,12 @@ export class FarmFromPlaceAction extends CompositeAction {
       await this.sendAttack(page);
       await waitLikeHuman();
 
-      farmManager.create(villageCoordinate, target.coordinate, army.getAttackDuration() * target.distance, army.squad);
+      this.farmManager.create(
+        villageCoordinate,
+        target.coordinate,
+        army.getAttackDuration() * target.distance,
+        army.squad,
+      );
     }
   }
 

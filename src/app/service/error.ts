@@ -17,24 +17,26 @@ export const setupErrorHandling = () => {
 
     logger.error('Unhandled error:', reason);
 
-    const prefix = moment().format('YYYYMMDD_HHmmss');
+    const fileNamePrefix = moment().format('YYYYMMDD_HHmmss');
+    const dirNamePrefix = moment().format('YYYYMMDD');
+    const dir = `./storage/reports/${dirNamePrefix}`;
 
-    if (!existsSync(getAppDir('./storage/reports/'))) {
-      mkdirSync(getAppDir('./storage/reports/'), { recursive: true });
+    if (!existsSync(getAppDir(dir))) {
+      mkdirSync(getAppDir(dir), { recursive: true });
     }
 
     const page = await agent.browser?.getPage();
 
     if (page) {
       await page.screenshot({
-        path: getAppDir(`./storage/reports/${prefix}_error.png`),
+        path: getAppDir(`${dir}/${fileNamePrefix}_error.png`),
         fullPage: true,
       });
 
-      writeFileSync(getAppDir(`./storage/reports/${prefix}_error.html`), await page.content());
+      writeFileSync(getAppDir(`${dir}/${fileNamePrefix}_error.html`), await page.content());
     }
 
-    writeFileSync(getAppDir(`./storage/reports/${prefix}_error.log`), reason.toString());
+    writeFileSync(getAppDir(`${dir}/${fileNamePrefix}_error.log`), reason.toString());
 
     await agent.stop();
     await wait(3000);

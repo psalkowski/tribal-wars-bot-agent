@@ -2,7 +2,9 @@ import { Action } from './action.js';
 import { Page } from 'puppeteer';
 import { Ui } from '../constants/ui.js';
 import { waitLikeHuman } from '../utils/wait.js';
+import { Service } from 'typedi';
 
+@Service()
 export class CloseDailyBonusPopupAction extends Action {
   name = 'CloseDailyBonusPopupAction';
 

@@ -1,10 +1,9 @@
 import { Page } from 'puppeteer';
 import { Action } from './action.js';
-import { parseTribalWarsUrl } from '../service/navigation.js';
-import { Ui } from '../constants/ui.js';
-import { Container } from 'typedi';
+import { Container, Service } from 'typedi';
 import Navigation from '../core/navigation.js';
 
+@Service()
 export class EnterWorldAction extends Action {
   name = 'EnterWorldAction';
 

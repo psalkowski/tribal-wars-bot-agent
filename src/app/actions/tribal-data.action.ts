@@ -4,21 +4,21 @@ import { fixTypes } from '../utils/fix-types.js';
 import { store } from '../store/store.js';
 import { setGame } from '../store/slices/game.slice.js';
 import { ITribalGame } from '../models/tribal.js';
+import { Service } from 'typedi';
 
 declare const TribalWars: any;
 
+@Service()
 export class TribalDataAction extends Action {
   async handle(page: Page): Promise<Action> {
-    const data: ITribalGame = await page.evaluate(() =>
-      TribalWars.getGameData(),
-    );
+    const data: ITribalGame = await page.evaluate(() => TribalWars.getGameData());
 
     store.dispatch(setGame(fixTypes(data)));
 
-    return Promise.resolve(undefined);
+    return null;
   }
 
-  async isSupported(page: Page): Promise<boolean> {
+  async isSupported(_: Page): Promise<boolean> {
     return true;
   }
 }

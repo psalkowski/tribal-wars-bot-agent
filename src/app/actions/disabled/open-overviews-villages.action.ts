@@ -1,8 +1,8 @@
-import { Action } from './action.js';
+import { Action } from '../action.js';
 import { Page } from 'puppeteer';
-import { scrollIntoViewport } from '../utils/scroll-into-viewport.js';
-import { getPlayerVillageCount } from '../store/slices/player.slice.js';
-import { store } from '../store/store.js';
+import { scrollIntoViewport } from '../../utils/scroll-into-viewport.js';
+import { getPlayerVillageCount } from '../../store/slices/player.slice.js';
+import { store } from '../../store/store.js';
 
 export class OpenOverviewsVillagesAction extends Action {
   name = 'OpenOverviewsVillagesAction';

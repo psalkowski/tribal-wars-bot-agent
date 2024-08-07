@@ -1,4 +1,4 @@
-import { Action } from './action.js';
+import { Action } from '../action.js';
 import { Page } from 'puppeteer';
 import moment from 'moment';
 
@@ -11,9 +11,7 @@ export class IncomingAttackAction extends Action {
 
     const incomings = rows.map(async (row) => {
       const id = (await row.$('[data-id]')).getProperty('data-id');
-      const endTime = (await row.$('[data-endtime]')).getProperty(
-        'data-endtime',
-      );
+      const endTime = (await row.$('[data-endtime]')).getProperty('data-endtime');
       const now = moment().valueOf();
     });
 

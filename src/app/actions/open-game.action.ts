@@ -1,16 +1,19 @@
 import { Page } from 'puppeteer';
 import { Action } from './action.js';
-import { Container } from 'typedi';
+import { Service } from 'typedi';
 import Navigation from '../core/navigation.js';
 import { ScreenType } from '../constants/screen.js';
 
+@Service()
 export class OpenGameAction extends Action {
   name = 'OpenGameAction';
 
-  async handle(page: Page): Promise<Action> {
-    const navigation = Container.get(Navigation);
+  constructor(private readonly navigation: Navigation) {
+    super();
+  }
 
-    await navigation.goToScreen(ScreenType.OVERVIEW);
+  async handle(_: Page): Promise<Action> {
+    await this.navigation.goToScreen(ScreenType.OVERVIEW);
 
     return null;
   }

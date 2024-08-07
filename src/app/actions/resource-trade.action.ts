@@ -7,19 +7,23 @@ import { CheckAction } from '../composite/check.action.js';
 import { Resource } from '../constants/resource.js';
 import { average } from '../utils/average.js';
 import { MAX_RESOURCE_DIFF } from '../constants/app.js';
-import { OpenOverviewAction } from './open-overview.action.js';
+import { OpenOverviewAction } from './disabled/open-overview.action.js';
 import { waitLikeHuman } from '../utils/wait.js';
 import { toNumber } from '../utils/number.js';
 import Logger from '../core/logger.js';
+import { Service } from 'typedi';
 
+@Service()
 export class ResourceTradeAction extends Action {
   private readonly logger = Logger.getLogger('ResourceTradeAction');
   name = 'ResourceTradeAction';
-  overview = new OpenOverviewAction();
-  check = new CheckAction();
 
   private marketSelector = `#map area[shape="poly"][href$="screen=${ScreenType.MARKET}"]`;
   private tradeLinkSelector = `.vis.modemenu a[href$="mode=own_offer"]`;
+
+  constructor(private readonly overview: OpenOverviewAction, private readonly check: CheckAction) {
+    super();
+  }
 
   async handle(page: Page): Promise<Action> {
     const marketElement = await page.$(this.marketSelector);

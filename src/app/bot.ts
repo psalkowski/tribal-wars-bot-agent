@@ -1,27 +1,20 @@
 import { ActionManager } from './manager/action.manager.js';
 import { Game } from './game/game.js';
 import { Config } from './constants/config.js';
-import { FarmManager } from './manager/farm.manager.js';
 import { Service } from 'typedi';
 import { Page } from 'puppeteer';
-import { BattleReportManager } from './manager/battle-report.manager.js';
+import { GameManager } from './manager/game.manager.js';
 
 @Service()
 export class Bot {
-  constructor(
-    protected game: Game,
-    protected farmManager: FarmManager,
-    protected battleReportManager: BattleReportManager,
-  ) {}
+  constructor(protected game: Game, protected gameManager: GameManager, protected actionManager: ActionManager) {}
 
   public async run(config: Config, page: Page) {
     this.game.setConfig(config);
     this.game.setPage(page);
 
-    await this.farmManager.load();
-    await this.battleReportManager.load();
-
-    await ActionManager.run(page);
+    await this.gameManager.load();
+    await this.actionManager.run(page);
   }
 }
 

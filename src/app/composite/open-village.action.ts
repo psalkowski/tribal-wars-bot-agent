@@ -1,5 +1,5 @@
 import { CompositeAction } from './composite.action.js';
-import { OpenOverviewsVillagesAction } from '../actions/open-overviews-villages.action.js';
+import { OpenOverviewsVillagesAction } from '../actions/disabled/open-overviews-villages.action.js';
 import { Page } from 'puppeteer';
 import { Action } from '../actions/action.js';
 import { scrollIntoViewport } from '../utils/scroll-into-viewport.js';

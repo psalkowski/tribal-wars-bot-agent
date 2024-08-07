@@ -1,24 +1,37 @@
 import { store } from '../store/store.js';
-import { getFarmCommands } from '../store/slices/farm-commands.slice.js';
 import moment from 'moment';
 import { Service } from 'typedi';
 import { random } from '../utils/random.js';
 import { getStartedAt } from '../store/slices/agent.slice.js';
+import { PlaceAction } from '../composite/place.action.js';
+import { MarketAction } from '../composite/market.action.js';
+import { ReportAction } from '../composite/report.action.js';
+import { Action } from '../actions/action.js';
 
 @Service()
 export class QueueManager {
   private readonly nightStart = moment().set({ hour: 0, minute: 0 });
   private readonly nightEnd = moment().set({ hour: 5, minute: 0 });
 
-  private readonly agentRunTimeInDay = 120 * 60 * 1000;
-  private readonly agentRunTimeInNight = 60 * 60 * 1000;
+  private readonly agentRunTimeInDay = 15 * 60 * 1000;
+  private readonly agentRunTimeInNight = 15 * 60 * 1000;
+
+  private readonly actions: Action[];
+
+  constructor(
+    private readonly placeAction: PlaceAction,
+    private readonly marketAction: MarketAction,
+    private readonly reportAction: ReportAction,
+  ) {
+    this.actions = [this.placeAction, this.marketAction, this.reportAction];
+  }
 
   getNextActionTime(): number {
-    const nextRun = this.getNextFarmTime();
-    const delayBetweenRuns = this.getSafeTimeOffset();
+    const nextRun = Math.min(...this.actions.map((action) => action.getNextRun()));
+    const minimumDelay = this.getMinimumDelay();
 
-    if (nextRun < delayBetweenRuns) {
-      return delayBetweenRuns;
+    if (nextRun < minimumDelay) {
+      return minimumDelay;
     }
 
     return nextRun;
@@ -30,31 +43,12 @@ export class QueueManager {
     return moment().valueOf() - this.getAgentStartAt() > runTime;
   }
 
-  getSafeTimeOffset(): number {
-    if (this.shouldCloseAgent()) {
-      return this.isNight() ? this.getWaitTimeDuringNight() : this.getWaitTimeDuringDay();
+  getMinimumDelay(): number {
+    if (this.isNight()) {
+      return this.getWaitTimeDuringNight();
     }
 
-    // when agent finished run, add extra 30 and 90 sec before run next action
-    return random(30000, 90000);
-  }
-
-  getNextFarmTime() {
-    const farmCommands = getFarmCommands(store.getState());
-    const now = moment().valueOf();
-
-    const sortedCommands = farmCommands
-      .filter((command) => command.returnAt > now)
-      .sort((prev, next) => prev.returnAt - next.returnAt);
-
-    if (!sortedCommands.length) {
-      return 0;
-    }
-
-    const firstReturnAt = sortedCommands[0].returnAt;
-    const lastElement = sortedCommands.filter((command) => command.returnAt - firstReturnAt < 60000).pop();
-
-    return lastElement.returnAt - now;
+    return this.getWaitTimeDuringDay();
   }
 
   private getAgentStartAt() {
@@ -66,10 +60,10 @@ export class QueueManager {
   }
 
   private getWaitTimeDuringNight() {
-    return random(50 * 60 * 1000, 80 * 60 * 1000);
+    return random(60 * 60 * 1000, 90 * 60 * 1000);
   }
 
   private getWaitTimeDuringDay() {
-    return random(20 * 60 * 1000, 40 * 60 * 1000);
+    return random(30 * 60 * 1000, 60 * 60 * 1000);
   }
 }

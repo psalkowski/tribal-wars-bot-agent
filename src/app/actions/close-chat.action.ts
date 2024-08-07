@@ -1,7 +1,9 @@
 import { Action } from './action.js';
 import { Page } from 'puppeteer';
 import { NoopAction } from './noop.action.js';
+import { Service } from 'typedi';
 
+@Service()
 export class CloseChatAction extends Action {
   name = 'CloseChatAction';
 

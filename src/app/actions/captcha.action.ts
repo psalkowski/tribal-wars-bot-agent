@@ -3,7 +3,9 @@ import { Page } from 'puppeteer';
 import { wait, waitLikeHuman } from '../utils/wait.js';
 import { NoopAction } from './noop.action.js';
 import Logger from '../core/logger.js';
+import { Service } from 'typedi';
 
+@Service()
 export class CaptchaAction extends Action {
   logger = Logger.getLogger('CaptchaAction');
   name = 'CaptchaAction';
@@ -14,19 +16,20 @@ export class CaptchaAction extends Action {
       await waitLikeHuman();
     }
 
+    this.logger.log('Trying to solve Captcha.');
     const { solved, solutions, captchas, error } = await page.solveRecaptchas();
 
     if (error) {
-      this.logger.log('Recaptcha Error:', { solved, solutions, captchas, error });
+      this.logger.log('Error occurs during Captcha solving:', JSON.stringify({ solved, solutions, captchas, error }));
     }
 
     if (solved.length || solutions.length || captchas.length) {
-      this.logger.log('Recaptcha Solved:', { solved, solutions, captchas, error });
+      this.logger.log('Captcha has been solved:', JSON.stringify({ solved, solutions, captchas, error }));
       // make sure that captcha has been filled
       await wait(5000);
     }
 
-    return new NoopAction();
+    return null;
   }
 
   async isSupported(page: Page): Promise<boolean> {

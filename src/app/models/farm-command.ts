@@ -1,4 +1,5 @@
 import { IArmy } from './army.js';
+import { Coordinate } from './coordinate.js';
 
 export interface IFarmCommand extends IArmy {
   sourceX: number;
@@ -23,3 +24,5 @@ export interface IFarmCommandPayload extends IArmy {
   arriveAt: number;
   returnAt: number;
 }
+
+export type IFarmCommandWithCoordinate = IFarmCommand & { coordinate: Coordinate };

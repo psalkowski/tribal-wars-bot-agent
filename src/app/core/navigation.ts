@@ -17,13 +17,17 @@ export default class Navigation {
 
   async goToUrl(url: string) {
     const page = await this.browser.getPage();
-    const parsedUrl = url.startsWith('http') ? url : `${this.getDomain()}${url}`;
+    const parsedUrl = this.sanitizeQueryParams(url.startsWith('http') ? url : `${this.getDomain()}${url}`);
+
+    if (parsedUrl === page.url()) {
+      return;
+    }
 
     await Promise.all([
       page.waitForNavigation({
         waitUntil: 'networkidle0',
       }),
-      page.goto(parseTribalWarsUrl(parsedUrl)),
+      page.goto(parsedUrl),
     ]);
 
     if (await this.captcha.isSupported(page)) {
@@ -33,19 +37,17 @@ export default class Navigation {
 
   async goToScreen(screen: ScreenType, extraParams = {}) {
     const page = await this.browser.getPage();
-    const url = new URL(this.getGameUrl(screen));
+    const url = this.sanitizeQueryParams(this.getGameUrl(screen), extraParams);
 
-    objectKeys(extraParams).forEach((key) => {
-      url.searchParams.append(key, extraParams[key] || '');
-    });
-
-    this.logger.debug(`Go to ${screen}`, url.toString());
+    if (url === page.url()) {
+      return;
+    }
 
     await Promise.all([
       page.waitForNavigation({
         waitUntil: 'networkidle0',
       }),
-      page.goto(url.toString()),
+      page.goto(url),
     ]);
 
     if (await this.captcha.isSupported(page)) {
@@ -53,8 +55,24 @@ export default class Navigation {
     }
   }
 
+  private sanitizeQueryParams(url: string, params = {}) {
+    const result = new URL(parseTribalWarsUrl(url));
+
+    objectKeys(params).forEach((key) => {
+      result.searchParams.append(key, params[key] || '');
+    });
+
+    for (const [key, value] of result.searchParams.entries()) {
+      if (!value) {
+        result.searchParams.delete(key);
+      }
+    }
+
+    return result.toString();
+  }
+
   private getGameUrl(screen: ScreenType) {
-    return parseTribalWarsUrl(`${this.getDomain()}/game.php?village=__village__&screen=${screen}`);
+    return `${this.getDomain()}/game.php?village=__village__&screen=${screen}`;
   }
 
   private getDomain() {
